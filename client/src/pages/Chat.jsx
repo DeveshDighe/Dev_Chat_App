@@ -1,25 +1,29 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import TypingComp from '../components/shared/TypingComp';
 import moment from 'moment';
 import { getChatDetail, getMessages } from '../tanstack/chats_logic';
 import { getSocket } from '../utils/socket';
-import { NEW_MESSAGE } from '../constants/events';
+import { NEW_MESSAGE, TYPING_MESSAGE, TYPING_SOPPED_MESSAGE } from '../constants/events';
 import { useSocketEvents } from '../hooks/hook';
 import { useDispatch, useSelector } from 'react-redux';
 import { removeAllMessages, setActiveChatID } from '../redux/reducers/usefull';
 import AttachmentsMap from '../components/shared/AttachmentsMap';
 import AttachmentContent from '../components/shared/AttachmentContent';
 import ChattingWith from '../components/shared/ChattingWith';
-import { addMessageCountAndNewMessage } from '../redux/reducers/chats';
+import { addMessageCountAndNewMessage, removeChatDetail } from '../redux/reducers/chats';
+import ChatLoading from '../components/shared/ChatLoading';
+import { useMediaQuery } from '@mui/material';
+import ClipLoader from 'react-spinners/ClipLoader';
 
 const Chat = () => {
   const [page, setPage] = useState(1);
   const [prevChatID, setPrevChatID] = useState(null);
+  const [userTyping, setUserTyping] = useState(false);
   const [allMessages, setAllMessages] = useState([]);
   const containerRef = useRef(null);
   const param = useParams();
-  const socket = getSocket();
+  const { socket } = getSocket();
   const { user } = useSelector((state) => state.authReducer);
   const { oldMessages, hasMoreMessages } = useSelector((state) => state.usefullReducer);
   const { uploadingLoader } = useSelector((state) => state.randomReducer);
@@ -27,10 +31,11 @@ const Chat = () => {
 
   const dispatch = useDispatch();
   const chatId = param.chatID;
-  const chattingWith = chatDetail?.members?.filter((member) => member._id !== user._id);
-  
+  const chattingWith = chatDetail
+
   const { refetch, data, isLoading } = getChatDetail(chatId, true);
-  const { refetch: refetchMessages, data: messageData } = getMessages(chatId, page);
+  const { refetch: refetchMessages, data: messageData, isLoading: messagesLoading } = getMessages(chatId, page);
+  const isSmallScreen = useMediaQuery('(max-width: 650px)'); // Detect screen size
 
   const isInitialLoad = useRef(true);
   const prevScrollHeightRef = useRef(0);
@@ -38,29 +43,36 @@ const Chat = () => {
   // Handle chat ID changes
   useEffect(() => {
     if (chatId && prevChatID !== chatId) {
-      setAllMessages([]);
-      dispatch(removeAllMessages());
       // dispatch(removeActiveChatID());
-      setPage(1);
-      setPrevChatID(chatId);
+      if (!isSmallScreen) {
+        dispatch(removeAllMessages());
+        setAllMessages([]);
+        setPage(1);
+        setPrevChatID(chatId);
+      }
     }
     if (chatId) {
       refetch();
       dispatch(setActiveChatID(chatId));
       refetchMessages();
     }
-    
+
   }, [chatId, prevChatID, refetch, refetchMessages, dispatch]);
 
 
 
-  useEffect(()=>{
+  useEffect(() => {
 
     return () => {
-      setAllMessages([]);
-      
+      if (isSmallScreen) {
+        dispatch(removeAllMessages());
+        setAllMessages([]);
+        setPage(1);
+        setPrevChatID(chatId);
+      }
+      dispatch(removeChatDetail());
     }
-  },[])
+  }, [])
 
   // Save the current scroll position relative to the bottom
   const saveScrollPosition = () => {
@@ -99,108 +111,140 @@ const Chat = () => {
 
   // Handle new messages from socket
   const messageListener = useCallback((data) => {
-    
+
     if (data.message.chat === chatId) {
       const newMessage = data.message;
       // Check if user is at or near the bottom
       const container = containerRef.current;
       const isAtBottom = container && (container.scrollHeight - container.scrollTop - container.clientHeight < 50); // Threshold for being near bottom
-  
+
       // Add the new message to the chat
       setAllMessages((prevData) => [...prevData, newMessage]);
-  
+
       // If the user was at the bottom, scroll to the bottom after message is added
       if (isAtBottom && container) {
         setTimeout(() => {
           container.scrollTop = container.scrollHeight; // Scroll to the bottom
         }, 0);
       }
-    }
-    data = {...data, currentChatID : chatId}
-    console.log('Chat called here');
 
+      data = { ...data, currentChatID: chatId }
       dispatch(addMessageCountAndNewMessage(data));
-    
+    }
+
 
   }, [chatId]);
-  
 
-  const eventHandler = { [NEW_MESSAGE]: messageListener };
+  const TypingMessageListener = useCallback((data) => {
+    console.log(data, 'This is typing data');
+
+    setUserTyping(true);
+  }, [chatId]);
+
+  const TypingMessageSoppedListener = useCallback((data) => {
+    setUserTyping(false);
+  }, [chatId]);
+
+  const eventHandler = {
+    [NEW_MESSAGE]: messageListener,
+    [TYPING_MESSAGE]: TypingMessageListener,
+    [TYPING_SOPPED_MESSAGE]: TypingMessageSoppedListener,
+  };
+
   useSocketEvents(socket, eventHandler);
 
-  // Handle scrolling to load more messages
-  // const handleScroll = () => {
-  //   if (containerRef.current) {
-  //     const container = containerRef.current;
-  //     if (container.scrollTop === 0 && hasMoreMessages && allMessages?.length>19) {
-  //       console.log(hasMoreMessages , 'hasMoreMessages hasMoreMessages hasMoreMessages hasMoreMessages hasMoreMessages hasMoreMessages hasMoreMessages', allMessages?.length , 'allMessages?.length allMessages?.length');
-        
-  //       // User has scrolled to the top, save scroll position and load more messages
-  //       saveScrollPosition();
-  //       setPage(prevPage => prevPage + 1);
-  //     }
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   const container = containerRef.current;
-  //   if (container) {
-  //     container.addEventListener('scroll', handleScroll);
-  //   }
-  //   return () => {
-  //     if (container) {
-  //       container.removeEventListener('scroll', handleScroll);
-  //     }
-  //   };
-  // }, [handleScroll]);    // problem is here
-
-  
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  // if (allMessages.length < 1) {
-  //   return <div>No messages available</div>;
-  // }
 
   const memberIds = data?.data?.members?.map((member) => member._id) || [];
+
+  console.log(chattingWith, 'chatting With');
+
 
   return (
     <div className='conta2 relative'>
       <div className='flex h-full flex-col element bg-[#eefffe]'>
-        <div className='h-13'>
-          <ChattingWith chattingWith={chattingWith} />
+        <div className='h-13 shadow'>
+          <ChattingWith chattingWith={chattingWith} userTyping={userTyping} />
         </div>
-        <div ref={containerRef} className="flex flex-col flex-grow space-y-2 p-4 overflow-auto relative ">
-          {allMessages.map((message, index) => {
-            const timeAgo = moment(message.createdAt).fromNow();
+        <div ref={containerRef} className={`flex flex-col flex-grow space-y-2 p-4 overflow-auto relative scroll max-md:px-1 ${allMessages.length < 1 && 'px-1'}`}>
+          {
+            isSmallScreen
+              ? allMessages.length < 1
+                ? <ChatLoading />
+                : allMessages.map((message, index) => {
+                  const timeAgo = moment(message.createdAt).fromNow();
 
-            if (message.attachements && message.attachements.length > 0) {
-              const attachments = message.attachements;
-              return (
-                <React.Fragment key={`${message._id}-${index}`}>
-                  <AttachmentsMap attachments={attachments} message={message} user={user} timeAgo={timeAgo}/>
-                  {message?.content && <AttachmentContent user={user} message={message} timeAgo={timeAgo}/>}
-                </React.Fragment>
-              );
-            }
+                  if (message.attachements && message.attachements.length > 0) {
+                    const attachments = message.attachements;
+                    return (
+                      <React.Fragment key={`${message._id}-${index}`}>
+                        <AttachmentsMap attachments={attachments} message={message} user={user} timeAgo={timeAgo} />
+                        {message?.content && <AttachmentContent user={user} message={message} timeAgo={timeAgo} />}
+                      </React.Fragment>
+                    );
+                  }
 
-            return (
-              <span key={message?._id} className={`${message?.sender._id === user._id ? 'self-end bg-[#93d6fa] text-left' : 'self-start bg-[#9f90f3] text-left'} inline-block p-2 rounded-lg text-left`}>
-                <p className=' mr-10'>{message?.content || message?.content}</p>
-                <p className='text-[10px] text-right ml-3'>{timeAgo}</p>
-              </span>
-            );
-          })}
+                  return (
+                    <span
+                      key={message?._id}
+                      className={`${message?.sender._id === user._id ? 'self-end bg-[#93d6fa]' : 'self-start bg-[#9f90f3]'} max-w-[55%] inline-block p-2 rounded-lg text-left`}
+                    >
+                      <div className='flex flex-col'>
+                        <p className='text-wrap break-words'>{message?.content || message?.content}</p>
+                        <p className='text-[10px] text-right mt-1'>{timeAgo}</p>
+                      </div>
+                    </span>
+                  );
+                })
+              :
+              allMessages.length < 1
+                ?
+                <div className=' flex justify-center'>
+                  <span className=' bg-[#ffea9c] text-[#545454] text-center px-4 rounded-md'>Start conversation with {chattingWith && chattingWith[0]?.name}</span>
+                </div>
+                :
+                allMessages.map((message, index) => {
+                  const timeAgo = moment(message.createdAt).fromNow();
+
+                  if (message.attachements && message.attachements.length > 0) {
+                    const attachments = message.attachements;
+                    return (
+                      <React.Fragment key={`${message._id}-${index}`}>
+                        <AttachmentsMap attachments={attachments} message={message} user={user} timeAgo={timeAgo} />
+                        {message?.content && <AttachmentContent user={user} message={message} timeAgo={timeAgo} />}
+                      </React.Fragment>
+                    );
+                  }
+
+                  return (
+                    <span
+                      key={message?._id}
+                      className={`${message?.sender._id === user._id ? 'self-end bg-[#93d6fa] max-w-[55%]' : 'self-start bg-[#9f90f3]'} max-w-[55%] inline-block p-2 rounded-lg text-left`}
+                    >
+                      <div className='flex flex-col'>
+                        <p className='text-wrap break-words'>{message?.content || message?.content}</p>
+                        <p className='text-[10px] text-right mt-1'>{timeAgo}</p>
+                      </div>
+                    </span>
+                  );
+                })
+          }
         </div>
         <div className='h-14'>
-          {uploadingLoader && <div className='absolute left-[45%] bottom-16 z-30 text-center self-center'>Loading</div>}
+          {uploadingLoader &&
+            <div className='absolute left-[45%] bottom-16 z-30 text-center self-center flex items-center gap-x-2 bg-white px-3 rounded-md'>
+              <ClipLoader
+                color="#00b2ff"
+                size={20}
+                speedMultiplier={2}
+              />
+              <p className=' text-[16px]'>Sending...</p>
+            </div>}
           <TypingComp chatID={chatId} members={memberIds} />
         </div>
       </div>
     </div>
   );
+
 };
 
-export default Chat;
+export default memo(Chat);

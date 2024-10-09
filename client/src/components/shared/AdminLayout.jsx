@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { memo, useState } from 'react'
 
 import SliderAdmin from '../../pages/admin/SliderAdmin';
 import {Close as CloseIcon, Menu as MenuIcon,} from '@mui/icons-material'
@@ -37,4 +37,4 @@ const AdminLayout = ({children}) => {
   )
 }
 
-export default AdminLayout
+export default memo(AdminLayout)

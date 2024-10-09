@@ -31,9 +31,6 @@ const SliderAdmin = ({ w = "100%" }) => {
   const location = useLocation();
   // const dispatch = useDispatch();
 
-  console.log(location , 'location');
-  
-
   const logoutHandler = () => {
     // dispatch(adminLogout());
   };

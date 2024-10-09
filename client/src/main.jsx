@@ -8,6 +8,7 @@ import { Provider } from 'react-redux';
 import store from './redux/store.js';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools'
+import { SocketProvider } from './utils/socket.jsx';
 
 
 const queryClient = new QueryClient()
@@ -16,11 +17,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   // <React.StrictMode>
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
-        <ReactQueryDevtools initialIsOpen={true} position='bottom-right'/>
+      <SocketProvider>
+        <ReactQueryDevtools initialIsOpen={true} position='bottom-left'/>
         <HelmetProvider>
           <CssBaseline />
           <App />
         </HelmetProvider>
+        </SocketProvider>
       </QueryClientProvider>
     </Provider>
   // </React.StrictMode>

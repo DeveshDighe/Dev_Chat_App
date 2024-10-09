@@ -38,9 +38,9 @@ const App = () => {
             <Route path='/admin/chats' element={<ChatsManagement />} />
             <Route path='*' 
             element={
-              <SocketProvider>
+              
                 <ProtectedRoute user={user} />
-                </SocketProvider>
+
               } />
           </Routes>
         </Suspense>

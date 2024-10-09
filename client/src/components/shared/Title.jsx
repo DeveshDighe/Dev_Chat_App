@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { Helmet } from 'react-helmet-async'
 
 const Title = ({title= 'Chat App', description = 'This is chat app dev chat'}) => {
@@ -10,4 +10,4 @@ const Title = ({title= 'Chat App', description = 'This is chat app dev chat'}) =
   )
 }
 
-export default Title
+export default memo(Title)

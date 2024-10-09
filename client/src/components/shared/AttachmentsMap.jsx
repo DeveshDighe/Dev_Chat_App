@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { fileFormat } from '../../lib/features';
 import RenderAttachment from '../../lib/helper_components/RenderAttachment';
 
 const AttachmentsMap = ({attachments, message, user, timeAgo}) => {
+  console.log(attachments , ' This is attachments');
+  
   return (
     <>
     {attachments.map((attachment) => {
@@ -14,11 +16,11 @@ const AttachmentsMap = ({attachments, message, user, timeAgo}) => {
           key={attachment.public_id} // Ensure uniqueness by using the public_id for attachments
           className={`${
             message?.sender._id === user._id
-              ? 'self-end bg-[#93d6fa] text-left'
+              ? 'self-end bg-[#93d6fa] text-left '
               : 'self-start bg-[#9f90f3] text-left'
-          } inline-block p-2 rounded-lg text-left`}
+          } inline-block p-2 rounded-lg text-left max-w-[55%]`}
         >
-          <a href={attachment.url} target="_blank" rel="noopener noreferrer">
+          <a href={attachment.url} target="_blank" rel="noopener noreferrer" >
             {RenderAttachment(file, url)} {/* Render the appropriate component based on the file type */}
           </a>
           <p className="text-[10px] mt-2 text-right ml-3">{timeAgo}</p>
@@ -29,4 +31,4 @@ const AttachmentsMap = ({attachments, message, user, timeAgo}) => {
   )
 }
 
-export default AttachmentsMap
+export default memo(AttachmentsMap)

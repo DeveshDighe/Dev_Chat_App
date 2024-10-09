@@ -4,7 +4,9 @@ const User = require('../models/user');
 
 const isAuthenticated = (req, res, next) => {
   try {
-    const token = req.cookies.UserToken;
+    // const token = req.cookies.UserToken;
+    const token =req.headers.authorization?.split(' ')[1];
+
 
     if (!token) {
       throw new Error('Please login first')
@@ -19,35 +21,29 @@ const isAuthenticated = (req, res, next) => {
   }
 }
 
-const socketAuthenticator =async (err, socket, next) => {
+const socketAuthenticator = async (socket, next) => {
   try {
-    if (err) {
-      throw new Error('please login to access this socket');
+    // Extract the JWT from the Authorization header
+    const token = socket.handshake.query.userToken;
+    
+    if (!token) {
+      throw new Error('Please login to access this socket');
     }
 
-    const authToken = socket.request.cookies.UserToken;
-
-    if (!authToken) {
-      throw new Error('please login to access this socket');  
-    }
-
-    const decodedData = jwt.verify(authToken, process.env.JWT_SECRET);
+    const decodedData = jwt.verify(token, process.env.JWT_SECRET);
 
     const user = await User.findById(decodedData._id);
 
     if (!user) {
-      throw new Error('please login to access this socket');  
-      
+      throw new Error('User not found. Please login again');
     }
 
     socket.user = user;
-    return next();
+    next();
   } catch (error) {
-    console.log(error);
-    
-    return next(error.message)
+    next(new Error(error.message));
   }
-}
+};
 
 
 module.exports = {

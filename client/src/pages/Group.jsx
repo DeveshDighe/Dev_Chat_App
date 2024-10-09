@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import moment from 'moment';
 import { useDispatch, useSelector } from 'react-redux';
-import { removeAllMessages } from '../redux/reducers/usefull';
+import { removeAllMessages, setActiveChatID } from '../redux/reducers/usefull';
 import { getChatDetail, getMessages } from '../tanstack/chats_logic';
-import { NEW_MESSAGE } from '../constants/events';
+import { NEW_MESSAGE, TYPING_MESSAGE, TYPING_SOPPED_MESSAGE } from '../constants/events';
 import { useSocketEvents } from '../hooks/hook';
 import { getSocket } from '../utils/socket';
 import EditGroups from '../components/shared/EditGroup';
@@ -14,45 +14,48 @@ import AttachmentsMap from '../components/shared/AttachmentsMap';
 import AttachmentContent from '../components/shared/AttachmentContent';
 import AttachmentsMapGroup from '../components/shared/AttachmentsMapGroup';
 import { addMessageCountAndNewMessage } from '../redux/reducers/chats';
+import { useMediaQuery } from '@mui/material';
+import ChatLoading from '../components/shared/ChatLoading';
+import ClipLoader from "react-spinners/ClipLoader";
 
 const Group = () => {
   const [page, setPage] = useState(1);
   const [prevGroupID, setPrevGroupID] = useState(null);
+  const [userTyping, setUserTyping] = useState(null);
   const [allMessages, setAllMessages] = useState([]);
   const containerRef = useRef(null);
   const { groupID } = useParams();
-  const socket = getSocket();
+  const {socket} = getSocket();
   let groupEditClicked = false;
 
-
+  const { refetch, data, isLoading } = getChatDetail(groupID, true);
+  const { refetch: refetchMessages, data: messageData } = getMessages(groupID, page);
   const { user } = useSelector((state) => state.authReducer);
   const { oldMessages } = useSelector((state) => state.usefullReducer);
   const { uploadingLoader } = useSelector((state) => state.randomReducer);
   const { chatDetail } = useSelector((state) => state.chatReducer);
-
+  
   const dispatch = useDispatch();
-
-  const { refetch, data, isLoading } = getChatDetail(groupID, true);
-  const { refetch: refetchMessages, data: messageData } = getMessages(groupID, page);
-
+  const isSmallScreen = useMediaQuery('(max-width: 650px)'); // Detect screen size
   const isInitialLoad = useRef(true);
   const prevScrollHeightRef = useRef(0);
 
-  // Handle group ID changes
   useEffect(() => {
     if (groupID && prevGroupID !== groupID) {
-      setAllMessages([]);
-      dispatch(removeAllMessages());
-      setPage(1);
-      setPrevGroupID(groupID);
+      if (!isSmallScreen) {
+        setAllMessages([]);
+        dispatch(removeAllMessages());
+        setPage(1);
+        setPrevGroupID(groupID);
+      }
     }
     if (groupID) {
       refetch();
+      dispatch(setActiveChatID(groupID));
       refetchMessages();
     }
   }, [groupID, prevGroupID, refetch, refetchMessages, dispatch]);
 
-  // Save the current scroll position relative to the bottom
   const saveScrollPosition = () => {
     if (containerRef.current) {
       const container = containerRef.current;
@@ -60,13 +63,25 @@ const Group = () => {
     }
   };
 
-  // Restore the scroll position to maintain user position
   const restoreScrollPosition = () => {
     if (containerRef.current) {
       const container = containerRef.current;
       container.scrollTop = container.scrollHeight - prevScrollHeightRef.current;
     }
   };
+
+  useEffect(() => {
+
+    return () => {
+      if (isSmallScreen) {
+      dispatch(removeAllMessages());
+      setAllMessages([]);
+      setPage(1);
+      setPrevGroupID(groupID);
+      }
+
+    }
+  }, [])
 
   // Handle old messages loading
   useEffect(() => {
@@ -96,102 +111,137 @@ const Group = () => {
       const container = containerRef.current;
       const isAtBottom = container && (container.scrollHeight - container.scrollTop - container.clientHeight < 50); // Threshold for being near bottom
 
-      console.log(newMessage, 'newMessage newMessage');
-      
-      setAllMessages((prevData) => [...prevData, newMessage]);
 
+      setAllMessages((prevData) => [...prevData, newMessage]);
+      data = { ...data, currentChatID: groupID }
+      dispatch(addMessageCountAndNewMessage(data));
+      
       if (isAtBottom && container) {
         setTimeout(() => {
           container.scrollTop = container.scrollHeight; // Scroll to the bottom
         }, 0);
       }
 
-      data = {...data, currentChatID : groupID}
-      dispatch(addMessageCountAndNewMessage(data));
+
 
     }
   }, [groupID]);
 
+  const TypingMessageListener = useCallback((data) => {
+    setUserTyping(data.userName);
+  }, [groupID]);
+  
+  const TypingMessageSoppedListener = useCallback((data) => {
+    setUserTyping(null);
+  }, [groupID]);
 
-  const eventHandler = { [NEW_MESSAGE]: messageListener };
+  const eventHandler = { [NEW_MESSAGE]: messageListener , 
+    [TYPING_MESSAGE] : TypingMessageListener,
+    [TYPING_SOPPED_MESSAGE] : TypingMessageSoppedListener,
+  };
   useSocketEvents(socket, eventHandler);
 
-  // Handle scrolling to load more messages
-  const handleScroll = () => {
-    if (containerRef.current) {
-      const container = containerRef.current;
-      if (container.scrollTop === 0) {
-        saveScrollPosition();
-        setPage(prevPage => prevPage + 1);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener('scroll', handleScroll);
-    }
-    return () => {
-      if (container) {
-        container.removeEventListener('scroll', handleScroll);
-      }
-    };
-  }, [handleScroll]);
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  // if (allMessages.length < 1) {
-  //   return <div>No messages available</div>;
-  // }
+
 
   const memberIds = data?.data?.members?.map((member) => member._id) || [];
+
 
   return (
     <div className='conta2 relative'>
       <div className='flex h-full flex-col element bg-[#eefffe]'>
-        <div className='h-13'>
-          <ChattingInGroup chattingInGroup={chatDetail} />
+        <div className='h-13 shadow'>
+          <ChattingInGroup chattingInGroup={chatDetail} userTyping={userTyping} />
         </div>
-        <div ref={containerRef} className="flex flex-col flex-grow space-y-4 p-4 overflow-auto relative">
-          {allMessages.map((message, index) => {
-            const timeAgo = moment(message.createdAt).fromNow();
+        <div ref={containerRef} className="flex flex-col flex-grow space-y-4 p-4 px-1 overflow-auto relative scroll">
+          {
+            isSmallScreen
+              ? allMessages.length < 1
+                ? <ChatLoading />
+                :
+                allMessages.map((message, index) => {
+                  const timeAgo = moment(message.createdAt).fromNow();
 
-            console.log(message, 'This is message off group');
+                  if (message.attachements && message.attachements.length > 0) {
+                    const attachments = message.attachements;
+                    return (
+                      <React.Fragment key={`${message._id}-${index}`}>
+                        <AttachmentsMapGroup attachments={attachments} message={message} user={user} timeAgo={timeAgo} />
+                        {message?.content && <AttachmentContent user={user} message={message} timeAgo={timeAgo} />}
+                      </React.Fragment>
+                    );
+                  }
 
+                  return (
+                    <div key={`${message._id}_${index}`} className={`${message?.sender._id === user._id ? 'self-end  max-w-[55%]' : ' flex gap-x-2  max-w-[55%]'}`}>
+                      {message?.sender._id !== user._id &&
+                        <div className=' w-6 h-6 mt-1'>
+                          <img className=' w-full h-full object-cover rounded-3xl' src={message?.sender?.avatar?.url} alt="sender dp" />
+                        </div>
+                      }
+                      <div className={` break-words max-w-full ${message?.sender._id === user._id ? 'self-end bg-[#93d6fa] text-left' : 'self-start bg-[#9f90f3] text-left'} inline-block py-1 px-3 rounded-lg text-left`}>
 
-            if (message.attachements && message.attachements.length > 0) {
-              const attachments = message.attachements;
-              return (
-                <React.Fragment key={`${message._id}-${index}`}>
-                  <AttachmentsMapGroup attachments={attachments} message={message} user={user} timeAgo={timeAgo} />
-                  {message?.content && <AttachmentContent user={user} message={message} timeAgo={timeAgo} />}
-                </React.Fragment>
-              );
-            }
+                        <p className=' font-semibold text-[14px]'>{message?.sender._id === user._id ? 'you' : `${message.sender.name}`}</p>
+                        <p className=' '>{message?.content || message?.content}</p>
+                        <p className='text-[10px] text-right ml-6 mt-1'>{timeAgo}</p>
+                      </div>
+                    </div>
 
-            return (
-              <div className={`${message?.sender._id === user._id ? 'self-end' : ' flex gap-x-2'}`}>
-                {message?.sender._id !== user._id &&
-                  <div className=' w-6 h-6 mt-1'>
-                    <img className=' w-full h-full object-cover rounded-3xl' src={message?.sender?.avatar?.url} alt="sender dp" />
-                  </div>
-                }
-                <div key={message?._id} className={`${message?.sender._id === user._id ? 'self-end bg-[#93d6fa] text-left' : 'self-start bg-[#9f90f3] text-left'} inline-block py-1 px-3 rounded-lg text-left`}>
-
-                  <p className=' font-semibold text-[14px]'>{message?.sender._id === user._id ? 'you' : `${message.sender.name}`}</p>
-                  <p className=' mr-10'>{message?.content || message?.content}</p>
-                  <p className='text-[10px] text-right ml-6 mt-1'>{timeAgo}</p>
+                  );
+                })
+              :
+              allMessages.length < 1 
+                ?
+                <div className=' flex justify-center'>
+                <span className=' bg-[#ffea9c] text-[#545454] text-center px-4 rounded-md'>Start conversation with friends</span>
                 </div>
-              </div>
+                :
+              allMessages.map((message, index) => {
+                const timeAgo = moment(message.createdAt).fromNow();
 
-            );
-          })}
+                if (message.attachements && message.attachements.length > 0) {
+                  const attachments = message.attachements;
+                  return (
+                    <React.Fragment key={`${message._id}-${index}`}>
+                      <AttachmentsMapGroup attachments={attachments} message={message} index={index} user={user} timeAgo={timeAgo} />
+                      {message?.content && <AttachmentContent user={user} message={message} timeAgo={timeAgo} />}
+                    </React.Fragment>
+                  );
+                }
+
+                return (
+                  <div  key={message?._id} className={` ${message?.sender._id === user._id ? 'self-end max-w-[55%]' : ' flex self-start gap-x-2 max-w-[55%]'}`}>
+                    {message?.sender._id !== user._id &&
+                      <div className=' w-6 h-6 mt-1'>
+                        <img className=' w-full h-full object-cover rounded-3xl' src={message?.sender?.avatar?.url} alt="sender dp" />
+                      </div>
+                    }
+                    <div  className={`${message?.sender._id === user._id ? 'self-end bg-[#93d6fa] text-left  break-words ' : 'self-start bg-[#9f90f3] text-left'} inline-block py-1 px-3 rounded-lg text-left max-w-full break-words`}>
+
+                      <p className=' font-semibold text-[14px]'>{message?.sender._id === user._id ? 'you' : `${message.sender.name}`}</p>
+                      <p className=''>{message?.content || message?.content}</p>
+                      <p className='text-[10px] text-right ml-6 mt-1'>{timeAgo}</p>
+                    </div>
+                  </div>
+
+                );
+              })
+          }
         </div>
         <div className='h-14'>
-          {uploadingLoader && <div className='absolute left-[45%] bottom-16 z-30 text-center self-center'>Loading</div>}
+          {uploadingLoader &&
+            <div className='absolute left-[45%] bottom-16 z-30 text-center self-center flex items-center gap-x-2 bg-white px-3 rounded-md'>
+              <ClipLoader
+                color="#00b2ff"
+                size={20}
+                speedMultiplier={2}
+              />
+              <p className=' text-[16px]'>Sending...</p>
+            </div>}
           <TypingComp chatID={groupID} members={memberIds} />
         </div>
       </div>
@@ -202,4 +252,4 @@ const Group = () => {
   );
 };
 
-export default Group;
+export default memo(Group);

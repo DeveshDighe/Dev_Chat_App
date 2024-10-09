@@ -5,17 +5,23 @@
 @tailwind utilities;
 
 
-*{
+* {
   box-sizing: border-box;
   @apply font-try2;
   user-select: none;
 }
 
-.feildWarnings{
+.feildWarnings {
   margin: -5px 0px;
   color: red;
   font-size: 14px;
 }
+
+.mainBg {
+  background: linear-gradient(160deg, rgba(124, 207, 249, 0.747) 0%, rgba(137, 117, 240, 0.5) 100%);
+}
+
+
 
 .searchBar {
   height: 0px;
@@ -28,6 +34,7 @@
   overflow: hidden;
   transform-origin: top;
 }
+
 .searchBarUser {
   height: 0px;
   width: 100%;
@@ -40,10 +47,29 @@
 }
 
 .searchBarUser.activeUser {
-height: 35px;
+  height: 35px;
   visibility: visible;
   background-color: #EFF3F6;
 }
+.searchBarUserGroup {
+  height: 0px;
+  width: 90%;
+  border-radius: 20px;
+  background-color: #EFF3F6;
+  padding: 0px 10px;
+  visibility: hidden;
+  overflow: hidden;
+  transform-origin: top;
+  margin: auto;
+  margin-top: 10px;
+}
+
+.searchBarUserGroup.activeUser {
+  height: 30px;
+  visibility: visible;
+  background-color: #EFF3F6;
+}
+
 .searchBar.active {
   height: 35px;
   visibility: visible;
@@ -51,7 +77,7 @@ height: 35px;
   animation: activateSearchBar 0.3s forwards ease;
 }
 
-.loading{
+.loading {
   width: 100%;
   height: 100vh;
   animation: loadingAni 1s ease-in-out infinite;
@@ -60,18 +86,29 @@ height: 35px;
   justify-content: center;
 }
 
-.conta{
+.conta {
   height: calc(100% - 1.5rem);
   /* height: calc(100%); */
   /* overflow: hidden; */
 }
-.conta2{
+
+.conta2 {
   height: calc(100%);
-    overflow: auto;
+  overflow: auto;
 }
 
-.AA{
-    overflow: auto;
+
+.widthOfListDiv {
+  width: calc(100% - 3.5rem);
+}
+
+.aaat {
+  width: calc(100% - 3rem);
+  background-color: red;
+}
+
+.AA {
+  overflow: auto;
 }
 
 /* Hide scrollbar for WebKit-based browsers */
@@ -81,12 +118,16 @@ height: 35px;
 
 /* Hide scrollbar for Firefox */
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;     /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
+
 .element {
   position: relative;
-  z-index: 1; /* Ensure the content stays above the background */
+  z-index: 1;
+  /* Ensure the content stays above the background */
 
 }
 
@@ -99,28 +140,121 @@ height: 35px;
   left: 0;
   right: 0;
   bottom: 0;
-  opacity: 0.3; /* Adjust opacity (0 is fully transparent, 1 is fully opaque) */
-  z-index: -1; /* Keep the image behind the content */
+  opacity: 0.3;
+  /* Adjust opacity (0 is fully transparent, 1 is fully opaque) */
+  z-index: -1;
+  /* Keep the image behind the content */
 }
 
+.shadow{
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
 
+.scroll::-webkit-scrollbar {
+  width: 6px; /* Change this value for scrollbar width */
+}
+
+/* Style the scrollbar handle */
+.scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(117, 117, 117, 0.5); /* You can adjust the color or transparency */
+}
+
+/* Optional: Add a hover effect on the scrollbar */
+.scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(66, 66, 66, 0.7); /* Darken on hover */
+}
+
+/* Hide scrollbar track (background) */
+.scroll::-webkit-scrollbar-track {
+  /* background: transparent; Set to transparent to hide the background */
+}
 
 @keyframes activateSearchBar {
   0% {
     height: 0px;
   }
+
   100% {
     height: 35px;
   }
 }
+
 @keyframes loadingAni {
   0% {
     background-color: #ffffff;
   }
+
   50% {
     background-color: #e9f6ff;
   }
+
   100% {
     background-color: #ffffff;
+  }
+}
+
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes rere {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+.fade-out {
+  animation: rere 0.5s ease-out forwards;
+}
+
+
+.chat-loading {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px; /* Adjust gap between messages */
+}
+
+.message-placeholder {
+  width: 60%;
+  height: 30px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1s infinite;
+}
+
+.user-message {
+  align-self: flex-end;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.bot-message {
+  align-self: flex-start;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: 0 0;
   }
 }

@@ -6,13 +6,14 @@ const allRoutes = require('./routes');
 const { connectDB } = require('./utils/features');
 const { Server } = require('socket.io');
 const { createServer } = require('http');
-const { NEW_MESSAGE, NEW_MESSAGE_ALERT } = require('./constants/events');
+const { NEW_MESSAGE, NEW_MESSAGE_ALERT, TYPING_MESSAGE, TYPING_SOPPED_MESSAGE, USER_ONLINE, USER_OFFLINE } = require('./constants/events');
 const uuid = require('uuid');
 const cloudinary = require('cloudinary');
 const Message = require('./models/message');
 const { socketAuthenticator } = require('./middlewares/auth');
-const { getUserSocketIDs, addSocketID, removeSocketID, getSocketID } = require('./lib/socketManager'); // Import socket manager functions
+const { getUserSocketIDs, addSocketID, removeSocketID, getSocketID, getSocketIDWithoutEmitter } = require('./lib/socketManager'); // Import socket manager functions
 const Chat = require('./models/chat');
+const User = require('./models/user');
 
 dotenv.config({
   path: './.env'
@@ -48,21 +49,24 @@ app.use(cookieParser());
 
 app.use('/api/v1', allRoutes);
 
-io.use((socket, next) => {
-  cookieParser()(socket.request, socket.request.res, async (err) => {
-    await socketAuthenticator(err, socket, next);
-  });
+io.use(async(socket, next) => {
+  await socketAuthenticator(socket, next);
 });
 
-io.on("connection", (socket) => {
+
+io.on("connection", async (socket) => {
   const user = socket.user;
 
   // Adding a user and their associated socket ID
   addSocketID(user._id.toString(), socket.id.toString());
-  // console.log(getUserSocketIDs(), 'userSocketIDs');
+
+  const userUpdated = await User.findByIdAndUpdate(user._id, {status : 'ONLINE'})
+
+  io.emit(USER_ONLINE, userUpdated);
+
+
 
   socket.on(NEW_MESSAGE, async ({ chatID, members, message }) => {
-    console.log(members , "This is members");
     
     const messageForRealTime = {
       content: message,
@@ -76,7 +80,6 @@ io.on("connection", (socket) => {
       createdAt: new Date().toISOString(),
     };
 
-    // console.log(messageForRealTime, 'messageForRealTime');
 
     const messageForDB = {
       content: message,
@@ -104,14 +107,39 @@ io.on("connection", (socket) => {
       const chat = await Chat.findById(chatID);
       const message = await Message.create(messageForDB);
       chat.latestMessage = message._id;
+      chat.latestMessageTime = Date.now();
       await chat.save();
     } catch (error) {
       console.log(error);
     }
   });
 
-  socket.on('disconnect', () => {
+  socket.on(TYPING_MESSAGE, async ({ chatID, members, userName}) => {
+      const socketId = getSocketIDWithoutEmitter(members, user._id.toString());
+      console.log(socketId , 'This is socket dfff id', userName);
+      
+      if (socketId) {
+        io.to(socketId).emit(TYPING_MESSAGE, {
+          chatID,
+          userName
+        });
+      }
+  });
+  socket.on(TYPING_SOPPED_MESSAGE, async ({ chatID, members}) => {
+      const socketId = getSocketIDWithoutEmitter(members, user._id.toString());
+      console.log(socketId , 'This is socket dfff id stopped');
+      
+      if (socketId) {
+        io.to(socketId).emit(TYPING_SOPPED_MESSAGE, {
+          chatID,
+        });
+      }
+  });
+
+  socket.on('disconnect', async () => {
     removeSocketID(user._id.toString());
+    const userUpdated = await User.findByIdAndUpdate(user._id, {status : 'OFFINE'})
+    io.emit(USER_OFFLINE, userUpdated);
     console.log('a user disconnected', socket.id);
   });
 });

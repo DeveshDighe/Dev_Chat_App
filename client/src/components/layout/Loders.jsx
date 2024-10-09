@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import {ScaleLoader} from 'react-spinners'
 
 const Loders = () => {
@@ -9,5 +9,5 @@ const Loders = () => {
   )
 }
 
-export default Loders
+export default memo(Loders)
 

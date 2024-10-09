@@ -24,10 +24,9 @@ const Group = () => {
   const [page, setPage] = useState(1);
   const param = useParams();
   let groupEditClicked = false;
-  const socket = getSocket();
+  const {socket} = getSocket();
 
   const groupID = param.groupID;
-  console.log(groupID , 'groupIDiddidididididididiididididididididididididididiidididididididididididididididididididi');
   
   const containerRef = useRef(null);
 
@@ -43,14 +42,8 @@ const Group = () => {
   const dispatch = useDispatch();
 
 
-  console.log(chatDetail, 'This is chat Detail');
-  const chattingWith = chatDetail?.members?.filter((member) => member._id !== user._id);
-
   const { refetch, data , isLoading} = getChatDetail(groupID, true);
   const { refetch: refetchMessages, data: messageData } = getMessages(groupID, page);
-
-
-  console.log(data , 'data data data data');
   
   // Ref to keep track of scroll position
   const scrollOffsetRef = useRef(0);
@@ -71,9 +64,6 @@ const Group = () => {
   }, [groupID]);
 
 
-  console.log(oldMessages, 'This is oldMessages');
-
-
   const { data: infiniteData, setData: infiniteSetData } = useInfiniteScrollTop(
     containerRef,
     messageData?.totalPages,
@@ -81,15 +71,6 @@ const Group = () => {
     setPage,
     oldMessages
   );
-
-  console.log(infiniteData , 'infiniteData 11111111111111111111111111111111111111111111111111111111111111');
-  
-  // useEffect(() => {
-  //   if (messageData) {
-  //     // infiniteSetData((prevData) => [...prevData, ...messageData.messages]);
-  //   }
-  // }, [messageData]);
-
 
 
   const messageListener = useCallback((data) => {
@@ -138,9 +119,6 @@ const Group = () => {
 
   
 
-
-
-
   return (
     <div className=' conta2 relative'>
       <div className=' flex h-full flex-col bg-red-300'>
@@ -150,14 +128,10 @@ const Group = () => {
         <div ref={containerRef} className="flex flex-col flex-grow space-y-2 p-4 overflow-auto relative">
           {infiniteData?.map((message, index) => {
             const timeAgo = moment(message.createdAt).fromNow();
-
-            // console.log(message , 'message');
             
             if (message.attachements || message.attachements?.length>0) {
               
               const attachments = message.attachements;
-              // const file = fileFormat(url);
-              // console.log('yes its a attachment', attachments);
               
               return (
                 <React.Fragment key={`${message._id}-${index}`}>
