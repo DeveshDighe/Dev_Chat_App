@@ -20,11 +20,24 @@ const getSocketID = (userIDs) => {
     
   return socketIDs;
 }
+const getSocketIDWithoutEmitter = (userIDs, userID) => {
+
+  const socketIDs = userIDs.map((userId)=> 
+    { 
+      if (userId === userID) {
+        return
+      }
+      return userSocketIDs.get(userId.toString())
+    });
+    
+  return socketIDs;
+}
 
 module.exports = {
   getUserSocketIDs,
   addSocketID,
   removeSocketID,
-  getSocketID
+  getSocketID,
+  getSocketIDWithoutEmitter
 };
  

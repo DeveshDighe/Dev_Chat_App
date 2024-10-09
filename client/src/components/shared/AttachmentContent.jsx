@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 
 const AttachmentContent = ({message, user, timeAgo}) => {
   return (
@@ -16,4 +16,4 @@ const AttachmentContent = ({message, user, timeAgo}) => {
   )
 }
 
-export default AttachmentContent
+export default memo(AttachmentContent);

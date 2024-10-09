@@ -1,5 +1,5 @@
 
-const { ALERT, REFETCH_CHATS, NEW_ATTACHMENT, NEW_MESSAGE_ALERT, NEW_MESSAGE } = require('../constants/events.js');
+const { ALERT, REFETCH_CHATS, NEW_ATTACHMENT, NEW_MESSAGE_ALERT, NEW_MESSAGE, REFETCH_GROUP_DETAIL, ADDED_IN_GROUP } = require('../constants/events.js');
 const { getOtherMember } = require('../lib/helper.js');
 const Chat = require('../models/chat.js');
 const User = require('../models/user.js');
@@ -7,30 +7,51 @@ const Message = require('../models/message.js');
 const { emitEvent, deleteFilesFromClodinary, uploadFilesToClodinary } = require('../utils/features.js');
 
 const newGroupChat = async (req, res) => {
-  console.log('new group chat hitted');
-
   try {
-    const { name, members, groupImg } = req.body;
+    const { groupName, members } = req.body;
 
-    if (!groupImg) {
-      groupImg = 'https://media.istockphoto.com/id/1076599848/vector/meeting-isolated-on-white-background-vector-illustration.jpg?s=612x612&w=0&k=20&c=mfidH45AsCS5QXk-80LCy-XRgoedzQgz8H0FinRZlog='
+    // Ensure members is a valid JSON string
+    let parsedMembers;
+    try {
+      parsedMembers = JSON.parse(members);
+    } catch (error) {
+      throw new Error('Invalid members format. Please provide a valid JSON string.');
     }
 
-    if (members.length < 2) {
-      throw new Error('Group must have minimun 3 members');
+    if (parsedMembers.length < 2) {
+      throw new Error('Group must have a minimum of 3 members.');
     }
-    const allMembers = [...members, req.userID];
 
+    const file = req.file;
+
+    // Check if the file is uploaded
+    if (!file) {
+      throw new Error('Please upload an avatar.');
+    }
+
+    // Upload the file to Cloudinary
+    const result = await uploadFilesToClodinary([file], 'group_img');
+
+    const avatar = {
+      url: result[0]?.url || 'https://media.istockphoto.com/id/1076599848/vector/meeting-isolated-on-white-background-vector-illustration.jpg?s=612x612&w=0&k=20&c=mfidH45AsCS5QXk-80LCy-XRgoedzQgz8H0FinRZlog='
+    };
+
+    // Add the creator's ID to the members array
+    parsedMembers.push(req.userID);
+
+    // Create the group chat
     await Chat.create({
-      name,
-      groupImg,
+      name: groupName,
+      groupImg: avatar.url,
       groupChat: true,
       creator: req.userID,
-      members: allMembers
-    })
+      admin: [req.userID],
+      members: parsedMembers,
+      groupImgPublicId : result[0]?.public_id , 
+    });
 
-    emitEvent(req, ALERT, allMembers, `Welcome to ${name} group`);
-    emitEvent(req, REFETCH_CHATS, members);
+    // emitEvent(req, ALERT, parsedMembers, `Welcome to ${groupName} group`);
+    emitEvent(req, REFETCH_CHATS, parsedMembers);
 
     res.status(201).json({ status: 'success', message: 'Group created' });
   } catch (error) {
@@ -38,51 +59,58 @@ const newGroupChat = async (req, res) => {
   }
 }
 
+
 const getMyChat = async (req, res) => {
-  console.log(req.query , 'this is req quesry');
   const searchTerm = req.query.search;
   let filter = req.query.filter;
 
-console.log('filter', filter);
+console.log('getMy Chat hited', filter);
 
 
   let chats;
 
   try {
+    
     if (searchTerm || (filter === 'Groups' || filter === 'Chats')) {
-      console.log('did it entered here ?? ');
       
+      console.log(1);
       let groupChat;
-      if (filter==='Groups') {
-        groupChat=true;
-      }else{
-        groupChat=false;
+      if (filter === 'Groups' || filter === 'All') {
+        groupChat = true;
+      } else {
+        groupChat = false;
       }
-      chats = await Chat.find({ members: req.userID ,'name': { $regex: searchTerm, $options: 'i' }, groupChat : groupChat})
-      .populate('members', 'name avatar')
-      .populate({
-        path: 'latestMessage',
-        populate: {
-          path: 'sender',
-          select: 'name', // Adjust fields based on your User schema
-        },
-      });
+      console.log(groupChat , 'This is groupChat');
       
-      //populate only name  and avatar
-    }else{
+      chats = await Chat.find({ members: req.userID, 'name': { $regex: searchTerm, $options: 'i' }, groupChat: groupChat })
+        .populate('members', 'name avatar status')
+        .populate({
+          path: 'latestMessage',
+          populate: {
+            path: 'sender',
+            select: 'name', // Adjust fields based on your User schema
+          },
+        }).sort({ latestMessageTime: -1 });
 
-    chats = await Chat.find({ members: req.userID })
-      .populate('members', 'name avatar')
-      .populate({
-        path: 'latestMessage',
-        populate: {
-          path: 'sender',
-          select: 'name', // Adjust fields based on your User schema
-        },
-      });
-      
+        console.log(chats, 'chats');
+        
+      //populate only name  and avatar
+    } else {
+console.log(2);
+
+      chats = await Chat.find({ members: req.userID })
+        .populate('members', 'name avatar status')
+        .populate({
+          path: 'latestMessage',
+          populate: {
+            path: 'sender',
+            select: 'name', // Adjust fields based on your User schema
+          },
+        }).sort({ latestMessageTime: -1 });;
+
       //populate only name  and avatar
     }
+console.log(chats, 'This is chat89898');
 
     let allChats = [];
 
@@ -120,6 +148,7 @@ console.log('filter', filter);
     //   }
     // })
     // console.log(allChats, 'Theese are all chats');
+console.log(allChats , 'This is all Catas');
 
     res.status(200).json({ status: 'success', message: 'All chats fetched', chats: allChats })
 
@@ -159,6 +188,8 @@ const addMembers = async (req, res) => {
   try {
 
     const { chatID, members } = req.body;
+
+    console.log(chatID, members, '[][]][][][][');
 
     const chat = await Chat.findById(chatID);
 
@@ -206,8 +237,7 @@ const addMembers = async (req, res) => {
 
     const allUsersName = allNewMembers.map((i) => i.name).join(',');
 
-    emitEvent(req, ALERT, chat.members, `${allUsersName} has been added in the group`);
-
+    emitEvent(req, ADDED_IN_GROUP, chat.members, `${allUsersName} has been added in the group`);
     emitEvent(req, REFETCH_CHATS, chat.members);
 
 
@@ -252,12 +282,13 @@ const removeMember = async (req, res) => {
       return member.toString() !== userToRemoveID
     });
 
+    emitEvent(req, ADDED_IN_GROUP, chat.members, `${user.name} has removed by admin`);
+    emitEvent(req, REFETCH_CHATS, chat.members);
 
     chat.members = updatedChat;
     await chat.save();
 
-    emitEvent(req, ALERT, chat.members, `${user.name} has removed by admin`);
-    emitEvent(req, REFETCH_CHATS, chat.members);
+
 
     res.status(201).json({ status: 'success', message: 'Member successfully removed', updatedChat });
   } catch (error) {
@@ -284,7 +315,7 @@ const leaveGroup = async (req, res) => {
       throw new Error('Group must have minimum 3 members')
     }
 
-
+    //getting members exept me
     const remainingMember = chat.members.filter((member) => {
       return member.toString() !== req.userID.toString();
     });
@@ -303,7 +334,7 @@ const leaveGroup = async (req, res) => {
     chat.members = remainingMember;
     await chat.save();
 
-    emitEvent(req, ALERT, chat.members, `User ${user.name} has left the group`);
+    emitEvent(req, REFETCH_GROUP_DETAIL, chat.members, `User ${user.name} has left the group`);
 
     res.status(200).json({ status: 'success', message: 'Removed group successfully' });
 
@@ -314,10 +345,8 @@ const leaveGroup = async (req, res) => {
 
 const sendAttachments = async (req, res) => {
   try {
-    console.log('send attachment');
 
     const { chatID, content } = req.body;
-    console.log(chatID, 'chatId', content);
 
     const chat = await Chat.findById(chatID);
     const user = await User.findById(req.userID, 'name avatar');
@@ -346,16 +375,8 @@ const sendAttachments = async (req, res) => {
 
     const result = await uploadFilesToClodinary(files, 'all attachments');
 
-    console.log(result, 'This is result after uploading files');
-
-
-    console.log(files, 'This is files');
-    console.log(content, 'This is content');
-
     const attachments = result;
 
-
-    console.log(attachments, 'attachments attachments');
 
 
     const messageForDb = { content: content, attachements: attachments, sender: user._id, chat: chatID };
@@ -379,7 +400,6 @@ const sendAttachments = async (req, res) => {
 
     res.status(201).json({ status: 'success', message: 'Attachment sent successfully', data: message })
   } catch (error) {
-    console.log(error);
 
     res.status(500).json({ status: 'error', error: error.message });
 
@@ -392,15 +412,55 @@ const getChatDetails = async (req, res) => {
 
     if (req.query.populate === 'true') {
 
-      const chat = await Chat.findById(chatID).populate('members', 'name avatar').lean();    //Lean makes it a plain javascript object
+      const chat = await Chat.findById(chatID).populate('members', 'name avatar status').lean();    //Lean makes it a plain javascript object
+      
+      if (!chat) {
+        throw new Error('Chat not found');
+      }
+
+      chat.members = chat.members.map(({ _id, name, avatar, status }) => ({
+        _id,
+        name,
+        status,
+        avatar: avatar.url
+      }));
+
+      return res.status(200).json({ status: 'success', message: 'Chats fetched', data: chat })
+    }
+    else {
+
+      console.log('rerer');
+      
+      const chat = await Chat.findById(chatID);
+
 
       if (!chat) {
         throw new Error('Chat not found');
       }
 
-      chat.members = chat.members.map(({ _id, name, avatar }) => ({
+      return res.status(200).json({ status: 'success', message: 'Chats fully fetched', data: chat })
+    }
+  } catch (error) {
+    res.status(500).json({ status: 'error', error: error.message });
+
+  }
+}
+const getChatDetailsEdit = async (req, res) => {
+  try {
+    const chatID = req.params.id;
+
+    if (req.query.populate === 'true') {
+
+      const chat = await Chat.findById(chatID).populate('members', 'name avatar status').populate('creator', 'name avatar status').populate('admin', 'name avatar status').lean();    //Lean makes it a plain javascript object
+
+      if (!chat) {
+        throw new Error('Chat not found');
+      }
+
+      chat.members = chat.members.map(({ _id, name, avatar , status}) => ({
         _id,
         name,
+        status,
         avatar: avatar.url
       }));
 
@@ -507,7 +567,6 @@ const deleteChat = async (req, res) => {        //delete group amd all its messe
 }
 
 const getMessages = async (req, res) => {
-  console.log('get chat hitted', req.params.id);
 
   try {
     const chatID = req.params.id;
@@ -523,8 +582,7 @@ const getMessages = async (req, res) => {
     const limit = 20;
     const skip = (page - 1) * limit;
 
-    console.log(page, 'this is page');
-    console.log(skip, 'This is skip');
+
 
     // Fetch messages and count them in parallel
     const [messages, messagesCount] = await Promise.all([
@@ -541,17 +599,113 @@ const getMessages = async (req, res) => {
     const totalPages = Math.ceil(messagesCount / limit);
     const hasMore = page < totalPages;
 
-    console.log(messages.reverse(), 'messages.reverse()');
+    // console.log(messages.reverse(), 'messages.reverse()',messages.length);
 
     res.status(200).json({
       status: 'success',
       message: 'Messages fetched',
-      messages: messages,
+      messages: messages.reverse(),
       hasMore: hasMore,    // Include hasMore in the response
     });
 
   } catch (error) {
     res.status(500).json({ status: 'error', error: error.message });
+  }
+}
+
+const changeGroupName = async (req, res) => {
+  try {
+
+    const { name } = req.body;
+    const groupID = req.params.id;
+
+    if (!groupID) {
+      throw new Error('Group id required')
+    }
+    if (!name) {
+      throw new Error('Group name required')
+    }
+
+    const group = await Chat.findByIdAndUpdate(groupID, { name: name }, { new: true })
+
+    console.log(group, 'this is edited group');
+    res.status(200).json({
+      status: 'success',
+      message: 'Group name updated',
+    });
+  } catch (error) {
+    res.status(500).json({ status: 'error', error: error.message });
+
+  }
+}
+const makeAdmin = async (req, res) => {
+  try {
+
+
+    const {groupID, userID} = req.query;
+
+    console.log(userID, groupID , 'userID groupID');
+    
+
+    if (!groupID) {
+      throw new Error('Group id required')
+    }
+    if (!userID) {
+      throw new Error('User id required')
+    }
+
+    const group = await Chat.findById(groupID);
+    if (group.admin.includes(userID)) {
+      throw new Error('Already admin')
+    }
+    
+    group.admin = [...group.admin, userID]
+
+    await group.save()
+    console.log(group, 'this is edited group');
+    res.status(200).json({
+      status: 'success',
+      message: 'Promoted to admin',
+    });
+  } catch (error) {
+    res.status(500).json({ status: 'error', error: error.message });
+
+  }
+}
+
+const removeAdmin = async (req, res) => {
+  try {
+
+
+    const {groupID, userID} = req.query;
+
+    console.log(userID, groupID , 'userID groupID');
+    
+
+    if (!groupID) {
+      throw new Error('Group id required')
+    }
+    if (!userID) {
+      throw new Error('User id required')
+    }
+
+    const group = await Chat.findById(groupID);
+    if (!group.admin.includes(userID)) {
+      throw new Error('User is not an admin');
+    }
+
+    // Remove the user from the admin list
+    group.admin = group.admin.filter(adminID => adminID.toString() !== userID);
+
+    await group.save();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Removed from admin',
+    });
+  } catch (error) {
+    res.status(500).json({ status: 'error', error: error.message });
+
   }
 }
 
@@ -567,5 +721,9 @@ module.exports = {
   getChatDetails,
   renameGroup,
   deleteChat,
-  getMessages
+  getMessages,
+  getChatDetailsEdit,
+  changeGroupName,
+  makeAdmin,
+  removeAdmin
 }

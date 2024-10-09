@@ -10,11 +10,9 @@ import { Navigate, useNavigate } from 'react-router-dom';
 const AdminLogin = ({user}) => {
   const [showPass, setShowPass] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
+  const { errors, values, handleSubmit, handleChange, touched } =loginFormik();
 
-  const navigate = useNavigate()
 
-  console.log(user , 'This is user');
-  
 
   if (user) {
     return <Navigate to={'/admin/dashboard'} />
@@ -47,9 +45,6 @@ const AdminLogin = ({user}) => {
   };
 
 
-  const { errors, values, handleSubmit, handleChange, touched } =loginFormik();
-
-  console.log(values , 'These');
   
 
   const toggleLogin = () => setIsLogin(toggle => !toggle);

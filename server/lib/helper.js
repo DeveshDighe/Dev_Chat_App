@@ -17,5 +17,5 @@ const getBase64 = (file) => {
 module.exports = {
   getOtherMember,
   // getSockets,
-  getBase64
+  getBase64,
 };

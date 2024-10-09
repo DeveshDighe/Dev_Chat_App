@@ -29,14 +29,16 @@ const sendToken =async (res, user, statusCode, message) => {
 
 
 
-  return res.status(statusCode).cookie('UserToken', token, cookieOptions).json({
-    message, status : 'success', user
+  return res.status(statusCode).json({
+    message, status : 'success', user, token
   })
 }
 
 const emitEvent = (req, event , users, data) => {
   let io = req.app.get('io');
   const membersSockets = getSocketID(users);
+  console.log(membersSockets , "This is member socket");
+  
   io.to(membersSockets).emit(event, data);
 
 console.log('Emitign evebt');

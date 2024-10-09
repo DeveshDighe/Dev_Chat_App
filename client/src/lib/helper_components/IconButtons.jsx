@@ -1,5 +1,5 @@
 import { Badge, Grow, IconButton, Tooltip } from '@mui/material'
-import React from 'react'
+import React, { memo } from 'react'
 
 const IconButtonsComp = ({ title, Iccon, onClick, value, data, isClicked}) => {
   return (
@@ -10,12 +10,12 @@ const IconButtonsComp = ({ title, Iccon, onClick, value, data, isClicked}) => {
       aria-label={title}
       TransitionComponent={Grow}
     >
-      <IconButton sx={isClicked && {bgcolor : '#eff3f6'}} onClick={()=>onClick(data)}>
-        
-        {value ? <Badge badgeContent={value} color='error'> {<Iccon/>}</Badge> : <Iccon/>}
+      <IconButton sx={isClicked ? { bgcolor: '#eff3f6' } : {}} onClick={() => onClick(data)}>
+
+        {value ? <Badge badgeContent={value} color='error'> {<Iccon />}</Badge> : <Iccon />}
       </IconButton>
-    </Tooltip> 
+    </Tooltip>
   )
 }
 
-export default IconButtonsComp
+export default memo(IconButtonsComp)

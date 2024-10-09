@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     select: false,
   },
+  status : {
+    type : String,
+    default : 'OFFLINE',
+  },
   avatar: {
     public_id: {
       type: String,

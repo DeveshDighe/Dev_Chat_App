@@ -11,15 +11,26 @@ const chatSchema = new Schema({
     default : false,
   },
   groupImg : {
-    type : String,        //Add only when the chat is group
+      type: String,
+  },
+  groupImgPublicId : {
+      type: String,
   },
   creator: {
     type: Types.ObjectId,
     ref : 'User'
   },
+  admin: [{
+    type: Types.ObjectId,
+    ref : 'User'
+  }],
   latestMessage : {
     type : Types.ObjectId,
     ref : 'Message'
+  },
+  latestMessageTime : {
+    type : Date,
+    default :  Date.now
   },
   members : [             // ARRAY OF OBJECTS Users
    {

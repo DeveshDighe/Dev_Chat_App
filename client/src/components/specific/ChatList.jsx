@@ -1,15 +1,14 @@
-import React from 'react'
+import React, { memo } from 'react'
 import ChatItem from '../shared/ChatItem';
 
 const ChatList = ({ chats=[]}) => {
   return (
     <div className=''>
-      {chats?.map((data, index)=>{
-        console.log(data , 'popopopoopopopo');
-        
-        
-        const {avatar, name, _id,groupImg, groupChat, members, latestMessage, chats, newMessages,newMessageCount} = data;
+      {chats?.map((data, index)=>{    
+        const {avatar, name, _id,groupImg, groupChat, members, latestMessage, chats, newMessages,newMessageCount, status} = data;
 
+        console.log(data , 'lslllddfdffd');
+        
         return (
         <ChatItem 
         index={index}
@@ -23,6 +22,7 @@ const ChatList = ({ chats=[]}) => {
           newMessages={newMessages}
           groupImg={groupImg}
           newMessageCount={newMessageCount}
+          userStatus={members.status}
         /> 
         )
       })}
@@ -30,4 +30,4 @@ const ChatList = ({ chats=[]}) => {
   )
 }
 
-export default ChatList
+export default memo(ChatList)

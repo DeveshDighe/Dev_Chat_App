@@ -1,9 +1,14 @@
-import React, { useRef } from 'react';
+import React, { memo, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUploadingLoader } from '../../redux/reducers/random';
 import { sendAttachment } from '../../tanstack/chats_logic';
 import { setAttachments } from '../../redux/reducers/usefull';
+import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
+import FilePresentOutlinedIcon from '@mui/icons-material/FilePresentOutlined';
+import VideoCameraBackOutlinedIcon from '@mui/icons-material/VideoCameraBackOutlined';
+import AudioFileOutlinedIcon from '@mui/icons-material/AudioFileOutlined';
+import VideoCameraBackIcon from '@mui/icons-material/VideoCameraBack';
 
 const InputDropDown = ({ onFileSelect, setSelectedAttachments, selectedAttachments, chatID, content }) => {
 
@@ -30,7 +35,6 @@ const InputDropDown = ({ onFileSelect, setSelectedAttachments, selectedAttachmen
 
   const handleFileChange = (e, type) => {
     const files = Array.from(e.target.files);
-    console.log(`Selected ${type}:`, files, files.length);
     if (files.length > 5) {
       return toast.error(`You can't select more than 5 ${type}`);
     }
@@ -48,10 +52,11 @@ const InputDropDown = ({ onFileSelect, setSelectedAttachments, selectedAttachmen
   };
 
   return (
-    <ul className='absolute bottom-11 bg-yellow-200 w-28 left-4 flex flex-col rounded-md shadow-lg'>
-      {selectedAttachments !== '' && <li>{selectedAttachments}</li>}
-      <li className='p-2'>
-        <p className='mb-1' onClick={() => handleFileInputClick('Images')}>Image</p>
+    <ul className='absolute bottom-11 bg-white text-gray-500 w-28 left-4 flex flex-col overflow-hidden rounded-md shadow cursor-pointer'>
+      {selectedAttachments !== '' && <li className=' text-[12px] text-center p-1 text-[#0070ff]'>{selectedAttachments}</li>}
+      <li className='p-2 px-3 flex justify-between items-center  hover:bg-[#f5f5f5]' onClick={() => handleFileInputClick('Images')}>
+        <p className='mb-1' >Image</p>
+        <ImageOutlinedIcon/>
         <input
           type='file'
           multiple
@@ -61,8 +66,10 @@ const InputDropDown = ({ onFileSelect, setSelectedAttachments, selectedAttachmen
           style={{ display: 'none' }} // Hide the input element
         />
       </li>
-      <li className='p-2'>
-        <p className='mb-1' onClick={() => handleFileInputClick('Audios')}>Audio</p>
+      <li className='p-2 px-3 flex justify-between items-center hover:bg-[#f5f5f5]' onClick={() => handleFileInputClick('Audios')}>
+        <p className='mb-1' >Audio</p>
+        <AudioFileOutlinedIcon/>
+
         <input
           type='file'
           multiple
@@ -72,8 +79,10 @@ const InputDropDown = ({ onFileSelect, setSelectedAttachments, selectedAttachmen
           style={{ display: 'none' }} // Hide the input element
         />
       </li>
-      <li className='p-2'>
-        <p className='mb-1' onClick={() => handleFileInputClick('Videos')}>Video</p>
+      <li className='p-2 px-3 flex justify-between items-center hover:bg-[#f5f5f5]' onClick={() => handleFileInputClick('Videos')}>
+        <p className='mb-1' >Video</p>
+        <VideoCameraBackOutlinedIcon/>
+
         <input
           type='file'
           multiple
@@ -83,8 +92,10 @@ const InputDropDown = ({ onFileSelect, setSelectedAttachments, selectedAttachmen
           style={{ display: 'none' }} // Hide the input element
         />
       </li>
-      <li className='p-2'>
-        <p className='mb-1' onClick={() => handleFileInputClick('Files')}>File</p>
+      <li className='p-2 px-3 flex justify-between items-center hover:bg-[#f5f5f5]' onClick={() => handleFileInputClick('Files')}>
+        <p className='mb-1' >File</p>
+        <FilePresentOutlinedIcon/>
+
         <input
           type='file'
           multiple
@@ -98,4 +109,4 @@ const InputDropDown = ({ onFileSelect, setSelectedAttachments, selectedAttachmen
   );
 };
 
-export default InputDropDown;
+export default memo(InputDropDown);

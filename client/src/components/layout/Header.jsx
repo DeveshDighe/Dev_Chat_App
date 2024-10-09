@@ -1,5 +1,5 @@
 import { AppBar, Avatar, Box, Grow, IconButton, Toolbar, Tooltip, Typography } from '@mui/material';
-import React from 'react';
+import React, { memo } from 'react';
 import { gray } from '../../constants/color';
 import CommentRoundedIcon from '@mui/icons-material/CommentRounded';
 import AlbumOutlinedIcon from '@mui/icons-material/AlbumOutlined';
@@ -8,15 +8,34 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import IconButtons from '../../lib/helper_components/IconButtons';
 import IconButtonsComp from '../../lib/helper_components/IconButtons';
+import GroupAddOutlinedIcon from '@mui/icons-material/GroupAddOutlined';
+import Diversity3Icon from '@mui/icons-material/Diversity3';
 import { logOutUser } from '../../tanstack/user_logic';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { removeUser } from '../../redux/reducers/auth';
+import { setChatClicked, setCreateGroupClicked, setNewUserSearch, setNotification, setProfileClicked, setSearch } from '../../redux/reducers/random';
 
 const Header = () => {
 
-  const {mutate} = logOutUser();
+  const { user } = useSelector((state) => state.authReducer);
+  const { profileClicked, chatClicked, search, newUserSearch, notification , createGroup} = useSelector((state) => state.randomReducer);
+
+
+  const dispatch = useDispatch();
+
+  // const {mutate} = logOutUser();
 
   const handleChatClick = () => {
-    console.log('Chat has been clicked');
+    dispatch(setChatClicked(true));
+    if (profileClicked) {
+      dispatch(setProfileClicked(false));
+    } 
+    if (newUserSearch) {
+      dispatch(setNewUserSearch(false));
+    }
+    if (createGroup) {
+      dispatch(setCreateGroupClicked(false));
+    }
   }
   const handleStoriesClick = () => {
     console.log('Stories has been clicked');
@@ -24,29 +43,105 @@ const Header = () => {
   const handlePostsClick = () => {
     console.log('Posts has been clicked');
   }
-  const handleSettingClick = () => {
-    console.log('Settings has been clicked');
-  }
+
   const handleProfileClick = () => {
-    console.log('Profile has been clicked');
-    mutate();
+    dispatch(setProfileClicked(true));
+
+    if (chatClicked) {
+      dispatch(setChatClicked(false));
+    }
+
+    if (newUserSearch) {
+      dispatch(setNewUserSearch(false));
+    }
+
+    if (createGroup) {
+      dispatch(setCreateGroupClicked(false));
+    }
+  };
+
+  const handleAddUserClick = () => {
+    if (newUserSearch) {
+      dispatch(setNewUserSearch(false));
+    }
+
+    if (search) {
+      dispatch(setSearch(false));
+    }
+    if (notification) {
+      dispatch(setNotification(false));
+    }
+    if (profileClicked) {
+      dispatch(setProfileClicked(false));
+    }
+    if (chatClicked) {
+      dispatch(setChatClicked(false));
+    }
+    if (createGroup) {
+      dispatch(setCreateGroupClicked(false));
+    }
+
+    dispatch(setNewUserSearch(true));
 
   }
+
+
+  const handleCreateGroupClick = () => {
+    dispatch(setProfileClicked(false));
+    dispatch(setChatClicked(false));
+    dispatch(setNewUserSearch(false));
+    dispatch(setCreateGroupClicked(true))
+  }
+
   return (
     <>
-      <Box sx={{ flexGrow: 1, bgcolor:'grey'}} height={'100%'} >
+      <Box sx={{ flexGrow: 1, bgcolor: 'grey' }} height={'100%'} >
         <AppBar position="static" sx={{ bgcolor: gray, height: '100%' }}>
           <Toolbar sx={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', marginTop: '5px', height: '100%', marginBottom: '10px' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', }}>
 
-              <IconButtonsComp onClick={handleChatClick} title='Chats' Iccon={CommentRoundedIcon} />
-              <IconButtonsComp onClick={handleStoriesClick} title='Stories' Iccon={AlbumOutlinedIcon} />
-              <IconButtonsComp onClick={handlePostsClick} title='Posts' Iccon={StreamOutlinedIcon} />
+              <Tooltip
+                title="Chats"
+                placement="right"
+                arrow
+                aria-label="chats"
+                TransitionComponent={Grow}
+              >
+                <IconButton onClick={() => handleChatClick()} sx={{ backgroundColor: chatClicked ? '#dddddd' : 'initial' }}>
+                  <CommentRoundedIcon />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip
+                title="Add Friends"
+                placement="right"
+                arrow
+                aria-label="add friends"
+                TransitionComponent={Grow}
+              >
+                <IconButton onClick={() => handleAddUserClick()} sx={{ backgroundColor: newUserSearch ? '#dddddd' : 'initial' }}>
+                  <GroupAddOutlinedIcon />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip
+                title="Create Group"
+                placement="right"
+                arrow
+                aria-label="create group"
+                TransitionComponent={Grow}
+              >
+                <IconButton onClick={() => handleCreateGroupClick()} sx={{ backgroundColor: createGroup ? '#dddddd' : 'initial' }}>
+                  <Diversity3Icon />
+                </IconButton>
+              </Tooltip>
+
+              {/* <IconButtonsComp onClick={handleStoriesClick} title='Stories' Iccon={AlbumOutlinedIcon} />
+              <IconButtonsComp onClick={handlePostsClick} title='Posts' Iccon={StreamOutlinedIcon} /> */}
 
             </Box>
 
             <Box>
-              <IconButtonsComp onClick={()=>handleSettingClick()} title='Settings' Iccon={SettingsOutlinedIcon} />
               <Tooltip
                 title="Profile"
                 placement="right"
@@ -54,13 +149,14 @@ const Header = () => {
                 aria-label="profile"
                 TransitionComponent={Grow}
               >
-                <IconButton onClick={()=>handleProfileClick()}>
+                <IconButton onClick={() => handleProfileClick()} sx={{ backgroundColor: profileClicked ? '#dddddd' : 'initial' }}>
                   <Avatar sx={{
-                    width: '1.4rem',
-                    height: '1.4rem',
-                    objectFit: 'contain'
+                    width: '1.6rem',
+                    height: '1.6rem',
+                    objectFit: 'contain',
+
                   }}
-                    src={'https://media.istockphoto.com/id/1327592506/vector/default-avatar-photo-placeholder-icon-grey-profile-picture-business-man.jpg?s=612x612&w=0&k=20&c=BpR0FVaEa5F24GIw7K8nMWiiGmbb8qmhfkpXcp1dhQg='}
+                    src={user.avatar.url}
                   />
                 </IconButton>
               </Tooltip>
@@ -72,4 +168,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default memo(Header);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import { Avatar, Box, Button, Container, IconButton, Paper, Stack, TextField, Typography } from '@mui/material';
 import { FaRegUser } from "react-icons/fa";
 import { CameraAlt } from '@mui/icons-material';
@@ -11,10 +11,12 @@ import { loginSchema, RegisterSchema } from '../utils/yup';
 import { registerFormik } from '../lib/formikLogic';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { registerUser } from '../tanstack/user_logic';
+import ClipLoader from 'react-spinners/ClipLoader';
 
 const Register = ({user}) => {
   const [showPass, setShowPass] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
+  const [creatingUser, setCreatingUser] = useState(false);
   const [file, setFile] = useState(null);
 
 
@@ -57,6 +59,7 @@ const Register = ({user}) => {
     initialValues : {name : '', email : '',username : '', bio : '', password : '', avatar : ''},
     // validationSchema : RegisterSchema,
     onSubmit : (value, action) => {
+      setCreatingUser(true);
       const formData = new FormData();
       formData.append('avatar', file);
       formData.append('name', value.name);
@@ -78,7 +81,6 @@ const Register = ({user}) => {
     }
   };
 
-  console.log(values, 'These');
 
 
   const toggleLogin = () => setIsLogin(toggle => !toggle);
@@ -238,8 +240,17 @@ const Register = ({user}) => {
           </form>
         </>
       </Paper>
+          {creatingUser &&
+            <div className='absolute left-[45%] top-10 z-30 text-center self-center flex items-center gap-x-2 py-2 px-3 bg-white px-3 rounded-md'>
+              <ClipLoader
+                color="#00b2ff"
+                size={20}
+                speedMultiplier={2}
+              />
+              <p className=' text-[16px]'>User creating...</p>
+            </div>}
     </Container>
   )
 }
 
-export default Register;
+export default memo(Register);

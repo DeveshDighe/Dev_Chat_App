@@ -46,56 +46,104 @@ const chatReducer = createSlice({
     },
 
     addMessageCountAndNewMessage: (state, action) => {
-      console.log(action.payload, 'This is action payload');
-
       const { chatID, message, currentChatID } = action.payload;
+    
+      console.log(chatID, message, currentChatID, 'This is chatID, message, currentChatID');
+    
+      const chatIndex = state.chatsList.findIndex(chat => chat._id === chatID);
+      console.log(chatIndex, 'This is chatIndex');
+    
+      if (chatIndex !== -1) {
+        const chat = state.chatsList[chatIndex];
+        const isCurrentChat = chatID === currentChatID;
+    
+        // Create a new chat object with updated latestMessage
+        let updatedChat = {
+          ...chat,
+          latestMessage: message, // Always update the latest message
+          newMessageCount: isCurrentChat ? 0 : (chat.newMessageCount || 0) + 1 // Increment count only if it's not the current chat
+        };
+    
+        // Move the updated chat to the top of the list, regardless of currentChatID
+        state.chatsList.splice(chatIndex, 1); // Remove the chat from its current position
+        state.chatsList.unshift(updatedChat); // Add it to the top
+    
+        // Log the updated state of chatsList
+        console.log('After updating:', JSON.stringify(state.chatsList, null, 2));
+        
+      }
 
-      state.chatsList = state.chatsList.map(chat => {
-        if (chat._id === chatID) {
-          // If the user is viewing the current chat, only update the latestMessage
-          console.log(chatID, 'chatID', currentChatID, 'CurrentChatID');
-
-          if (chatID === currentChatID) {
-            return {
-              ...chat,
-              latestMessage: message, // Replace the latest message with the new message
-              // Do not increment newMessageCount
-            };
-          }
-
-          // If it's a different chat, update latestMessage and increase newMessageCount
-          else {
-            if (currentChatID) {
-
-              return {
-                ...chat,
-                latestMessage: message, // Replace the latest message with the new message
-                newMessageCount: (chat.newMessageCount || 0) + 1 // Increase newMessageCount
-              };
-
-            }
-          }
-
-        }
-
-        return chat; // If no match, return the chat as is
-      });
-
-      // Optionally update localStorage
       const localData = localStorage.getItem('chatData');
       let storedChatData = localData ? JSON.parse(localData) : [];
 
-      const chatIndex = storedChatData.findIndex(item => item.chatID === chatID);
-      if (chatIndex !== -1) {
+      const chatIndexLocal = storedChatData.findIndex(item => item.chatID === chatID);
+      if (chatIndexLocal !== -1) {
         // Only update newMessageCount in localStorage if chatID !== currentChatID
         if (chatID !== currentChatID) {
-          storedChatData[chatIndex].newMessageCount += 1;
+          storedChatData[chatIndexLocal].newMessageCount += 1;
         }
       } else {
         storedChatData.push({ chatID, newMessageCount: chatID === currentChatID ? 0 : 1 });
       }
 
       localStorage.setItem('chatData', JSON.stringify(storedChatData));
+    },
+    
+
+    messageSenderChatTop : (state, action) => {
+      const chatID = action.payload;
+
+      const chatIndex = state.chatsList.findIndex(chat => chat._id === chatID);
+      const chat = state.chatsList[chatIndex];
+
+      state.chatsList.splice(chatIndex, 1);
+      state.chatsList.unshift(chat);
+      return
+    },
+
+    chatActive : (state, action) => {
+      state.chatsList = state.chatsList.map((chat)=>{
+        if (chat.members._id === action.payload._id) {    
+          return {...chat, members: {
+            ...chat.members, // Spread the existing members object
+            status: "ONLINE", // Override the status property
+          }}
+        }
+        return chat;
+      })
+
+      if (state.chatDetail !== null) {
+        console.log(JSON.stringify(state.chatDetail), 'lplplp');
+        
+        state.chatDetail[0] = {
+          ...state.chatDetail[0], // Spread the existing properties of the first element
+          status: "ONLINE"        // Add the new status property
+      };
+      }
+      
+    },
+    chatDeactive : (state, action) => {
+      state.chatsList = state.chatsList.map((chat)=>{
+        console.log('Plain chat object:', JSON.parse(JSON.stringify(chat)));
+        
+        if (chat.members._id === action.payload._id) {
+          
+          return {...chat, members: {
+            ...chat.members, // Spread the existing members object
+            status: "OFFLINE", // Override the status property
+          }}
+        }
+        return chat;
+      })
+
+      if (state.chatDetail !== null) {
+        console.log(JSON.stringify(state.chatDetail), 'lplplp');
+        
+        state.chatDetail[0] = {
+          ...state.chatDetail[0], // Spread the existing properties of the first element
+          status: "OFFLINE"        // Add the new status property
+      };
+      }
     },
 
     messagesReaded: (state, action) => {
@@ -121,6 +169,7 @@ const chatReducer = createSlice({
 
       // Save updated data back to localStorage
       localStorage.setItem('chatData', JSON.stringify(storedChatData));
+      
     },
 
 
@@ -130,11 +179,19 @@ const chatReducer = createSlice({
     addChatDetail: (state, action) => {
       state.chatDetail = action.payload;
     },
+    addChatDetail: (state, action) => {
+      console.log(action.payload , 'This is action payload of chatDetail');
+      
+      state.chatDetail = action.payload;
+    },
     removeChatDetail: (state) => {
+      console.log(state.chatDetail , 'erere54545454545777777777777777777777777777777777777777777777777777777777777777');
+      
       state.chatDetail = null;
+      console.log(state.chatDetail , '6767777678888888888888888888888888888888888888888888888888888888888888888888888');
     }
   }
 });
 
-export const { addChatsList, removeChatsList, addChatDetail, removeChatDetail, addMessageCountAndAleartFromLocal, addMessageCountAndNewMessage, messagesReaded } = chatReducer.actions;
+export const { addChatsList, removeChatsList, addChatDetail, removeChatDetail, addMessageCountAndAleartFromLocal, addMessageCountAndNewMessage, messagesReaded , messageSenderChatTop, chatDeactive, chatActive} = chatReducer.actions;
 export default chatReducer.reducer;

@@ -4,7 +4,6 @@ const { sendToken, cookieOptions, emitEvent, uploadFilesToClodinary } = require(
 const Chat = require('../models/chat.js');
 const Request = require('../models/request.js');
 const { NEW_REQUEST, REFETCH_CHATS } = require('../constants/events.js');
-const { getOtherMember } = require('../lib/helper.js');
 const cloudinary = require('cloudinary');
 
 
@@ -42,13 +41,9 @@ const createUser = async (req, res) => {
   let result;
   try {
 
-    console.log('Request Body:', req.body);
-    console.log('Uploaded File (Avatar):', req.file);
-
     const { username, name, password, bio } = req.body;
 
     const file = req.file;
-    console.log(file, "This is file");
 
     if (!req.file) {
       throw new Error('Please upload avatar');
@@ -70,8 +65,8 @@ const createUser = async (req, res) => {
       avatar
     })
 
-    // res.status(201).json({message : 'User created', status : 'success'})
-    sendToken(res, createdUser, 201, "User created");
+    res.status(201).json({message : 'User created', status : 'success'})
+    // sendToken(res, createdUser, 201, "User created");
 
   } catch (error) {
 
@@ -88,9 +83,25 @@ const createUser = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
+    console.log('get user hitted');
+    
     const user = await User.findById(req.userID); 
 
     res.status(200).json({ status: 'success', message: 'User found', user })
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+}
+const getUserProfileDetail = async (req, res) => {
+  try {
+    const {userID} = req.query
+    console.log(req.query , 'req.query');
+    
+    console.log(userID, 'useriD');
+    
+    const user = await User.findById(userID); 
+
+    res.status(200).json({ status: 'success', message: 'User profile detail found', user })
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
@@ -105,7 +116,6 @@ const logOut = async (req, res) => {
 }
 
 const searchUsers = async (req, res) => {
-  console.log(req.userID, 'This is user ID');
   
   try {
     const { name } = req.query;
@@ -115,7 +125,7 @@ const searchUsers = async (req, res) => {
     // }
 
 
-    const myChats = await Chat.find({ groupChat: false, members: req.userID });
+    const myChats = await Chat.find({ groupChat: false, members: req.userID }).populate('members' , 'name avatar');
 
 
     //getting my friends and faltting the array;
@@ -172,7 +182,6 @@ const sendRequest = async (req, res) => {
     
     const requestToSend = await Request.findById(requestData._id).populate('sender', 'name avatar' ).lean();
 
-    console.log(requestToSend, 'res ers', requestData.sender);
     requestToSend.sender.avatar = requestToSend.sender.avatar.url
 
     emitEvent(req, NEW_REQUEST, [userID], requestToSend);
@@ -252,45 +261,80 @@ const getAllRequests = async (req, res) => {
   }
 }
 
-const getMyFriends = async (req, res) => {
+const getMyFriends = async (req, res) => { 
   try {
     const chatID = req.query.chatID;
+    const { name } = req.query;
 
-    const chats = await Chat.find({
-      members: req.userID,
-      groupChat: false,
-    }).populate("members", "name avatar");
+    console.log(name , 'maama');
+    
+    // Ensure chatID is provided
+    if (!chatID) {
+      return res.status(400).json({ status: 'error', message: 'Chat ID is required' });
+    }
 
-    const friends = chats.map(({ members }) => {
-      const otherUser = getOtherMember(members, req.userID);
+    // Fetch the chat group by chatID to get its members
+    const chat = await Chat.findById(chatID).populate("members", "name avatar");
+    
+    if (!chat) {
+      return res.status(404).json({ status: 'error', message: 'Chat not found' });
+    }
+
+    // Construct query for users
+    const query = {
+      _id: { $nin: chat.members.map(member => member._id) },  // Exclude users who are already members of the chat group
+    };
+
+    // If name is provided, add a regex filter to the query
+    if (name && name.trim()) { // Ensure name is not empty or just whitespace
+      query.name = { $regex: name, $options: 'i' };  // Case-insensitive search by name
+    }
+
+    // Fetch users who are not part of the chat group
+    const friendsNotInChatGroup = await User.find(query, "name avatar");
+
+    console.log(friendsNotInChatGroup, 'friendsNotInChatGroup');
+
+    // Return the users who are not part of the chat group
+    return res.status(200).json({
+      status: "success",
+      message: 'All friends fetched',
+      friendsNotInGroup: friendsNotInChatGroup
+    });
+    
+  } catch (error) {
+    console.error('Error in fetching friends:', error);
+    return res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+
+const getAllUser = async (req, res) => {
+  try {
+    const {name} = req.query;
+    const userID = req.userID
 
 
+    const users = await User.find({name: { $regex: name, $options: 'i' }});
 
+    console.log(userID, userID);
+    
 
-      return {
-        _id: otherUser._id,
-        name: otherUser.name,
-        avatar: otherUser.avatar.url
-      }
+    const usersExeptMe = users.filter((user) => {
+      return user._id.toString() !== userID.toString()
     })
 
-    if (chatID) {
-      const chat = await Chat.findById(chatID);
-
-      //getting only those friends who are not in a chat group. so i can add them.
-      const friendsButNotInChatGroup = friends.filter((friend) => {
-        return !chat.members.includes(friend._id);
-      });
-
-      return res.status(200).json({ status: "success", message: 'all friends fetched', friendsNotInGroup: friendsButNotInChatGroup })
-    } else {
-      return res.status(200).json({ status: "success", message: 'all friends fetched', friends })
-    }
+    console.log(users , 'This is users');
+    res.status(200).json({ status: 'success', message: 'all users fetched', users : usersExeptMe})
+    
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
-
   }
 }
+
+// Function to get members who are not the current user (i.e., other friends)
+
+
+
 module.exports = {
   loginUser,
   createUser,
@@ -300,5 +344,7 @@ module.exports = {
   sendRequest,
   acceptRequest,
   getAllRequests,
-  getMyFriends
+  getMyFriends,
+  getUserProfileDetail,
+  getAllUser
 }

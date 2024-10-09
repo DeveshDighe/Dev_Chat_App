@@ -1,24 +1,23 @@
-import React, { useState } from 'react'
+import React, { memo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { sampleChats } from '../../constants/sampleData';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import IconButtonsComp from '../../lib/helper_components/IconButtons';
 import DropDown from '../../lib/helper_components/DropDown';
 
-const ChattingInGroup = ({chattingInGroup}) => {
+const ChattingInGroup = ({chattingInGroup , userTyping}) => {
 
   const [iconClicked, setIconClicked] = useState(false);
-  const [dropDownData, setDropDownData] = useState(['Edit', 'Help', 'Report']);
+  const [dropDownData, setDropDownData] = useState(['View', 'Help', 'Report']);
 
 
 
 
   // const User = sampleChats.find((user) => user._id === ChatID);
 
-  const Group = chattingInGroup;
+  const Group = chattingInGroup ? chattingInGroup : '';
   
   const moreClicked = () => {
-    console.log('More clicked');
     setIconClicked(prev => !prev)
   }
   
@@ -30,12 +29,13 @@ const ChattingInGroup = ({chattingInGroup}) => {
       </div>
       <div>
         <p className=' font-semibold'>{Group.name}</p>
+        {userTyping !== null && <p className=' text-sm'>{userTyping} is typing...</p>}
       </div>
       </div>
       <div className=' relative z-10'>
         <IconButtonsComp title={'More'} Iccon={MoreVertIcon} onClick={moreClicked}/>
         {iconClicked &&
-        <DropDown content={dropDownData}/>
+        <DropDown content={dropDownData} groupId={Group._id}/>
       }
       </div>
       
@@ -43,4 +43,4 @@ const ChattingInGroup = ({chattingInGroup}) => {
   )
 }
 
-export default ChattingInGroup
+export default memo(ChattingInGroup);

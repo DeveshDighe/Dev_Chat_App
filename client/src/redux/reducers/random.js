@@ -5,6 +5,10 @@ const initialState = {
  newUserSearch : false,
  notification : false,
  uploadingLoader : false,
+ profileClicked : false,
+ chatClicked : false,
+ editGroup : false,
+ createGroup : false,
 }
 const randomReducer = createSlice({
   name : 'randomReducer',
@@ -16,14 +20,28 @@ const randomReducer = createSlice({
     setNewUserSearch : (state, action) => {
       state.newUserSearch = action.payload;
     },
+    setProfileClicked : (state,action) => {
+      console.log('enterd');
+      
+        state.profileClicked = action.payload;
+    },
+    setChatClicked : (state,action) => {
+        state.chatClicked = action.payload;;
+    },
+    setCreateGroupClicked : (state,action) => {
+        state.createGroup = action.payload;;
+    },
     setNotification : (state, action) => {
       state.notification = action.payload;
     },
     setUploadingLoader : (state, action) => {
       state.uploadingLoader = action.payload
+    },
+    setEditGroup : (state, action) => {
+      state.editGroup = action.payload
     }
   }
 })
 
-export const {setSearch, setNotification,setUploadingLoader, setNewUserSearch} = randomReducer.actions;
+export const {setSearch, setNotification,setUploadingLoader, setNewUserSearch, setProfileClicked,setChatClicked, setEditGroup, setCreateGroupClicked} = randomReducer.actions;
 export default randomReducer.reducer; 

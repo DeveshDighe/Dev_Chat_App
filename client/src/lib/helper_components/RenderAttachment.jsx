@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { transformImage } from "../../lib/features";
 import { FileOpen as FileOpenIcon } from "@mui/icons-material";
 

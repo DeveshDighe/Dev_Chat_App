@@ -9,7 +9,6 @@ export const loginFormik= () => {
     initialValues : { name: '', password: '' },
     validationSchema : loginSchema,
     onSubmit: (value) => {
-      console.log(value, 'This is val bro');
       navigate('/admin/dashboard')
     }
   });
@@ -21,7 +20,6 @@ export const registerFormik= () => {
     initialValues : { name: '', password: '', email: '', bio: '', avatar : '' },
     validationSchema : RegisterSchema,
     onSubmit: (value) => {
-      console.log(value, 'This is val bro');
     }
   });
 }

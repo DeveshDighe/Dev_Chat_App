@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import { Box, Button, Container, Paper, TextField, Typography } from '@mui/material';
 import { FaRegUser } from "react-icons/fa";
 import { FaEye } from "react-icons/fa";
@@ -11,21 +11,28 @@ import { loginSchema } from '../utils/yup';
 import { loginUser } from '../tanstack/user_logic';
 
 
-const Login = ({user}) => {
+const Login = ({ user }) => {
   const [showPass, setShowPass] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
 
   const navigate = useNavigate()
 
+  const { errors, values, handleSubmit, handleChange, touched } = useFormik({
+    initialValues: { name: '', password: '' },
+    // validationSchema : loginSchema,
+    onSubmit: (value, action) => {
+      mutate(value);
+      // action.resetForm();
+    }
+  });
 
 
-  
-  const {mutate} = loginUser();
-  
+  const { mutate } = loginUser();
+
 
   if (user) {
     return <Navigate to={'/'} />
-    
+
   }
 
   const inputStyle = {
@@ -54,20 +61,12 @@ const Login = ({user}) => {
   };
 
 
-  
 
 
 
-  const { errors, values, handleSubmit, handleChange, touched } =useFormik({
-    initialValues : {name : '', password : ''},
-    // validationSchema : loginSchema,
-    onSubmit : (value, action) => {
-      console.log(value , 'ppppp');
-      mutate(value);
-      // action.resetForm();
-    }
-  });
-  
+
+
+
 
   const toggleLogin = () => setIsLogin(toggle => !toggle);
 
@@ -90,70 +89,72 @@ const Login = ({user}) => {
           borderRadius: '20px',
         }}
       >
-          <>
-            <Typography variant='h4'>Login</Typography>
-            <form style={{ width: '90%', marginTop: '20px' }} onSubmit={handleSubmit} >
-              <Box display="flex" flexDirection="column" width="100%" position="relative">
-                <TextField
-                  fullWidth
-                  label="Name"
-                  margin="normal"
-                  variant="outlined"
-                  name='name'
-                  value={values.name}
-                  onChange={handleChange}
-                  sx={inputStyle}
-                />
-                <Box sx={{ position: 'absolute', top: '29px', right: '15px', opacity: 0.6, zIndex: 10, marginLeft: '20px', cursor: 'pointer' }}>
-                  <FaRegUser size={17} />
-                </Box>
+        <>
+          <Typography variant='h4'>Login</Typography>
+          <form style={{ width: '90%', marginTop: '20px' }} onSubmit={handleSubmit} >
+            <Box display="flex" flexDirection="column" width="100%" position="relative">
+              <TextField
+                fullWidth
+                label="Name"
+                margin="normal"
+                variant="outlined"
+                name='name'
+                value={values.name}
+                onChange={handleChange}
+                sx={inputStyle}
+                autoComplete="name"
+              />
+              <Box sx={{ position: 'absolute', top: '29px', right: '15px', opacity: 0.6, zIndex: 10, marginLeft: '20px', cursor: 'pointer' }}>
+                <FaRegUser size={17} />
               </Box>
-              {touched.name && errors.name && <p className='feildWarnings'>{errors.name}</p>}
-              <Box display="flex" flexDirection="column" width="100%" position="relative">
-                <TextField
-                  fullWidth
-                  type={showPass ? 'text' : 'password'}
-                  label="Password"
-                  name="password"
-                  margin="normal"
-                  variant="outlined"
-                  value={values.password}
-                  onChange={handleChange}
-                  sx={inputStyle}
-                />
-                <Box sx={{ position: 'absolute', top: '29px', right: '15px', opacity: 0.6, zIndex: 10, marginLeft: '20px', cursor: 'pointer' }}>
-                  {showPass ?
-                    <IoMdEyeOff onClick={() => setShowPass(toggle => !toggle)} size={17} />
-                    :
-                    <FaEye onClick={() => setShowPass(toggle => !toggle)} size={17} />
-                  }
-                </Box>
+            </Box>
+            {touched.name && errors.name && <p className='feildWarnings'>{errors.name}</p>}
+            <Box display="flex" flexDirection="column" width="100%" position="relative">
+              <TextField
+                fullWidth
+                type={showPass ? 'text' : 'password'}
+                label="Password"
+                name="password"
+                margin="normal"
+                variant="outlined"
+                value={values.password}
+                onChange={handleChange}
+                sx={inputStyle}
+                autoComplete="password"
+              />
+              <Box sx={{ position: 'absolute', top: '29px', right: '15px', opacity: 0.6, zIndex: 10, marginLeft: '20px', cursor: 'pointer' }}>
+                {showPass ?
+                  <IoMdEyeOff onClick={() => setShowPass(toggle => !toggle)} size={17} />
+                  :
+                  <FaEye onClick={() => setShowPass(toggle => !toggle)} size={17} />
+                }
               </Box>
-              {touched.password && errors.password && (<p className='feildWarnings'>{errors.password}</p>)}
+            </Box>
+            {touched.password && errors.password && (<p className='feildWarnings'>{errors.password}</p>)}
 
-              <Container sx={{ display: 'flex', justifyContent: 'center', padding: '20px 0px' }}>
-                <Button variant='contained' color='primary' type='submit' sx={{ background: '#8975f0', ':hover': { background: '#8F3EFF', } }}>
-                  Login
-                </Button>
-              </Container>
+            <Container sx={{ display: 'flex', justifyContent: 'center', padding: '20px 0px' }}>
+              <Button variant='contained' color='primary' type='submit' sx={{ background: '#8975f0', ':hover': { background: '#8F3EFF', } }}>
+                Login
+              </Button>
+            </Container>
 
-              <Typography sx={{ textAlign: 'center' }}>
-                Create an account ?
-                <Button
-                  variant='text'
-                  onClick={()=>navigate('/register')}
-                  sx={{ textTransform: 'none', paddingBottom: '10px' }}
-                >
-                  Register
-                </Button>
-              </Typography>
-            </form>
-          </>
+            <Typography sx={{ textAlign: 'center' }}>
+              Create an account ?
+              <Button
+                variant='text'
+                onClick={() => navigate('/register')}
+                sx={{ textTransform: 'none', paddingBottom: '10px' }}
+              >
+                Register
+              </Button>
+            </Typography>
+          </form>
+        </>
 
       </Paper>
     </Container>
   )
 }
 
-export default Login;
+export default memo(Login);
 

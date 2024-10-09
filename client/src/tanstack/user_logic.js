@@ -1,16 +1,17 @@
 import axios from "axios"
 import baseURL, { api } from "../constants/config"
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useDispatch } from "react-redux";
 import { addUser, removeUser } from "../redux/reducers/auth";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { getSocket } from "../utils/socket";
 
 
 const getUserFunc = async() => {
+  console.log('getUserFunc');
   try {
     const response = await api.get(`/user/get-user`);
-    console.log(response , 'This is response from get User data');
       return response.data
   } catch (error) {
     throw error;
@@ -18,6 +19,7 @@ const getUserFunc = async() => {
 }
 
 export const getUserData = async () => {
+  
   const dispatch = useDispatch();
   return useQuery({
     queryKey : ['user-data'],
@@ -27,6 +29,7 @@ export const getUserData = async () => {
     retryDelay: 1000,
     refetchOnWindowFocus: false,
     onSuccess : (data) => {
+      console.log('getUserDatavbnvnvbnvbnbvnvbn', data);
       dispatch(addUser(data.user));
     },
     onError : (err) => {
@@ -37,11 +40,10 @@ export const getUserData = async () => {
 
 
 const handleLoginFunc = async (userData) => {
-  console.log('uiuiuiu', userData);
-  
+  console.log('handleLoginFunc');
+
   try {
     const response = await api.post('/user', userData)
-    console.log(response , 'This is response from the login func');
     return response.data
   } catch (error) {
     throw error;
@@ -49,13 +51,16 @@ const handleLoginFunc = async (userData) => {
 }
 
 export const loginUser = () => {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   return useMutation({
     mutationFn: handleLoginFunc, // `handleLoginFunc` expects `userData` as an argument
     onSuccess: (data) => {
-      console.log('Login successful:', data);
-
+      console.log('loginUser', data);
+      queryClient.invalidateQueries(['user-data']);
+      
+      localStorage.setItem('User-Token', data.token);
       dispatch(addUser(data.user));
       toast.success(data.message);
       navigate('/');
@@ -69,8 +74,9 @@ export const loginUser = () => {
 
 
 const handleRegisterFunc =async (formdata) => {
-  console.log(formdata , 'laalalal54545454');
 
+  console.log('handleRegisterFunc');
+  
   for (let [key, value] of formdata.entries()) {
     console.log(key, value);
   }
@@ -80,7 +86,6 @@ const handleRegisterFunc =async (formdata) => {
       headers: {
         'Content-Type': 'multipart/form-data',
       }});
-    console.log(response , 'This is response of register function');
     return response.data;
   } catch (error) {
     throw error
@@ -93,18 +98,19 @@ export const registerUser = () => {
   return useMutation({
     mutationFn : handleRegisterFunc,
     onSuccess : (data) => {
-      console.log('success register', data);
+      console.log('registerUser', data);
+      
       toast.success(data.message);
       navigate('/login');
     },
     onError : (error) => {
-      console.log(error , 'This is error of register');
       toast.error(error.response.data.message);
     }
   })
 }
 
 const handleLogout = async () => {
+  console.log('handleLogoutFunc');
   try {
     const response = await api.get('user/logout')
     return response.data;
@@ -118,9 +124,9 @@ export const logOutUser = () => {
   return useMutation({
     mutationFn : handleLogout,
     onSuccess : (data) => {
-      console.log(data, 'User logout data');
       dispatch(removeUser());
       toast.success(data.message);
+      console.log('logOutUser', data); 
     },
     onError : (err) => {
       toast.error(err.response.data.message);
@@ -130,6 +136,7 @@ export const logOutUser = () => {
 
 
 const getSearchDataFunc = async () => {
+  console.log('getSearchDataFunc');
   try {
     const response = await api('user/search-users');
     return response.data;
@@ -139,7 +146,6 @@ const getSearchDataFunc = async () => {
 }
 
 export const getSerchData = (searchData) => {
-  console.log(searchData , 'This is search Data');
   
   return useQuery({
     queryKey : ['search-chats'],
@@ -149,11 +155,37 @@ export const getSerchData = (searchData) => {
     retryDelay: 1000,
     refetchOnWindowFocus: false,
     onSuccess : (data) => {
-      console.log(data, 'This is data');
+      console.log(data, 'This is data getSerchData');
       
     },
     onError : (err) => {
       
     }
+  })
+}
+
+
+
+const getAllUsersFunc = async (name) => {
+  console.log('getSearchDataFunc');
+  try {
+    const response = await api.get(`user/all-users?name=${name}`);
+    return response.data;
+  } catch (error) {
+    
+  }
+}
+
+export const getAllUsers = () => {
+  console.log('called with', name);
+  
+  return useMutation({
+    mutationFn : getAllUsersFunc,
+    onSuccess : (data) => {
+      console.log(data, 'This is data getAllUsers');
+    },
+    onError : (err) => {
+      
+    },
   })
 }

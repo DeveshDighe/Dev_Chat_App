@@ -3,7 +3,7 @@ import { useEffect } from "react"
 
 
 const useSocketEvents = (socket, handlers) => {
-  console.log(handlers , 'This is handlers');
+  console.log(handlers , 'handleres');
   
   useEffect(()=>{
     Object.entries(handlers).forEach(([event, handler])=>{
