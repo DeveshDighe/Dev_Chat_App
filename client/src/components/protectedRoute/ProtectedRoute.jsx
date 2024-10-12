@@ -18,10 +18,11 @@ import MenuIcon from '@mui/icons-material/Menu'; // Add a Menu Icon for opening 
 import EditGroup from '../shared/EditGroup';
 import { useQueryClient } from 'react-query';
 import CreateGroup from '../layout/CreateGroup';
+import Header from '../../components/layout/Header';
+import NotFound from '../../pages/NotFound';
 
-
-const Header = lazy(() => import('../../components/layout/Header'));
-const NotFound = lazy(() => import('../../pages/NotFound'));
+// const Header = lazy(() => import('../../components/layout/Header'));
+// const NotFound = lazy(() => import('../../pages/NotFound'));
 
 const ProtectedRoute = ({ user , token}) => {
   const param = useParams();
@@ -152,7 +153,7 @@ const ProtectedRoute = ({ user , token}) => {
               </div>
             </div>
             <div className='conta2 border col-span-7 max-2xl:col-span-5 max-custom-mdb:col-span-4'>
-              <Suspense fallback={<div>Loading....</div>}>
+              {/* <Suspense fallback={<div>Loading....</div>}> */}
                 <Routes>
                   <Route path='/' element={<Empty />} />
                   <Route path='/chat/:chatID' element={<Chat />} />
@@ -160,7 +161,7 @@ const ProtectedRoute = ({ user , token}) => {
                   <Route path='/group/Edit/:groupID' element={<EditGroup />} />
                   <Route path='*' element={<NotFound />} />
                 </Routes>
-              </Suspense>
+              {/* </Suspense> */}
             </div>
           </>
         ) : (
