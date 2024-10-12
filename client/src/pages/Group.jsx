@@ -155,7 +155,6 @@ const Group = () => {
 
 
   const memberIds = data?.data?.members?.map((member) => member._id) || [];
-  console.log(messagesLoading , ',mes');
 
 
   return (
