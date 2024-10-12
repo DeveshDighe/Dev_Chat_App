@@ -370,7 +370,7 @@ const sendAttachments = async (req, res) => {
 
 
 
-    const messageForDb = { content: content ? content : "attachment", attachements: attachments, sender: user._id, chat: chatID };
+    const messageForDb = { content: content, attachements: attachments, sender: user._id, chat: chatID };
 
     const messageForRealTime = {    // pasting all the messageForDb and then making changes in sender
       ...messageForDb,
@@ -380,14 +380,17 @@ const sendAttachments = async (req, res) => {
         avatar: user.avatar
       },
     };
-
+ 
     const message = await Message.create(messageForDb); //creating new message for db
 
     emitEvent(req, NEW_MESSAGE, chat.members, {
       message: messageForRealTime,
       chatID
     });
-    emitEvent(req, NEW_MESSAGE_ALERT, chat.members, { chatID });
+    emitEvent(req, NEW_MESSAGE_ALERT, chat.members, {
+      message: messageForRealTime,
+      chatID
+    });
 
     res.status(201).json({ status: 'success', message: 'Attachment sent successfully', data: message })
   } catch (error) {

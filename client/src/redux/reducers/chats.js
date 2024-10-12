@@ -50,7 +50,12 @@ const chatReducer = createSlice({
     
 
       const chatIndex = state.chatsList.findIndex(chat => chat?._id === chatID);
-    
+      
+      const updatedMessage = {
+        ...message,
+        content: message.content === "" ? "Attachment" : message.content // Check message.content, not message
+      };
+
       if (chatIndex !== -1) {
         const chat = state.chatsList[chatIndex];
         const isCurrentChat = chatID === currentChatID;
@@ -58,7 +63,7 @@ const chatReducer = createSlice({
         // Create a new chat object with updated latestMessage
         let updatedChat = {
           ...chat,
-          latestMessage: message, // Always update the latest message
+          latestMessage: updatedMessage, // Always update the latest message
           newMessageCount: isCurrentChat ? 0 : (chat.newMessageCount || 0) + 1 // Increment count only if it's not the current chat
         };
     
