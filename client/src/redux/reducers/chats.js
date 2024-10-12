@@ -49,7 +49,7 @@ const chatReducer = createSlice({
       const { chatID, message, currentChatID } = action.payload;
     
 
-      const chatIndex = state.chatsList.findIndex(chat => chat._id === chatID);
+      const chatIndex = state.chatsList.findIndex(chat => chat?._id === chatID);
     
       if (chatIndex !== -1) {
         const chat = state.chatsList[chatIndex];

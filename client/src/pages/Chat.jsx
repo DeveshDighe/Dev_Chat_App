@@ -72,6 +72,8 @@ const Chat = () => {
         setPrevChatID(chatId);
       }
       dispatch(removeChatDetail());
+      dispatch(setActiveChatID(null));
+
     }
   }, [])
 
@@ -144,11 +146,15 @@ const Chat = () => {
   }, [chatId]);
 
   const TypingMessageListener = useCallback((data) => {
+    if (data.chatID === chatId) {
     setUserTyping(true);
+    }
   }, [chatId]);
 
   const TypingMessageSoppedListener = useCallback((data) => {
+    if (data.chatID === chatId) {
     setUserTyping(false);
+    }
   }, [chatId]);
 
   const eventHandler = {

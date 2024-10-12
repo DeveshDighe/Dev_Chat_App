@@ -34,7 +34,12 @@ const usefullReducer = createSlice({
       state.hasMoreMessages = action.payload;
     },
     setActiveChatID : (state, action) => {
+      console.log(action.payload , 'this is active action');
+      
       state.activeChatID = action.payload;
+
+      console.log(JSON.stringify(state.activeChatID));
+      
     },
     
     // removeActiveChatID : (state, action) => {

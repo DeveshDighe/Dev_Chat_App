@@ -80,7 +80,8 @@ const Group = () => {
       setPage(1);
       setPrevGroupID(groupID);
       }
-
+      
+      dispatch(setActiveChatID(null));
     }
   }, [])
 
@@ -134,11 +135,15 @@ const Group = () => {
   }, [groupID]);
 
   const TypingMessageListener = useCallback((data) => {
-    setUserTyping(data.userName);
+    if (data.chatID === groupID) {
+      setUserTyping(data.userName);
+    }
   }, [groupID]);
   
   const TypingMessageSoppedListener = useCallback((data) => {
+    if (data.chatID === groupID) {
     setUserTyping(null);
+    }
   }, [groupID]);
 
   const eventHandler = { [NEW_MESSAGE]: messageListener , 

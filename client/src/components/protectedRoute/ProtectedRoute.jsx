@@ -44,6 +44,9 @@ const ProtectedRoute = ({ user , token}) => {
 
   const NewMessageListener = useCallback(
     (data) => {  
+      console.log(data, 'data');
+      console.log(activeChatID, 'activeChatID');
+      
       if (data.message.sender._id !== user?._id && data.chatID !== activeChatID) {
         dispatch(addMessageCountAndNewMessage(data));
       }
