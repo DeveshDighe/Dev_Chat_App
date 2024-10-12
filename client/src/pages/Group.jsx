@@ -114,7 +114,7 @@ const Group = () => {
 
 
       setAllMessages((prevData) => [...prevData, newMessage]);
-      if (data.message.sender._id === user._id) {
+      if (data.message.sender._id === user?._id) {
         playPopUpSound();
       }else{
         playPopUpSound2()
@@ -190,15 +190,15 @@ const Group = () => {
                   }
 
                   return (
-                    <div key={`${message._id}_${index}`} className={`${message?.sender._id === user._id ? 'self-end  max-w-[55%]' : ' flex gap-x-2  max-w-[55%]'}`}>
-                      {message?.sender._id !== user._id &&
+                    <div key={`${message._id}_${index}`} className={`${message?.sender._id === user?._id ? 'self-end  max-w-[55%]' : ' flex gap-x-2  max-w-[55%]'}`}>
+                      {message?.sender._id !== user?._id &&
                         <div className=' w-6 h-6 mt-1'>
                           <img className=' w-full h-full object-cover rounded-3xl' src={message?.sender?.avatar?.url} alt="sender dp" />
                         </div>
                       }
-                      <div className={` break-words max-w-full ${message?.sender._id === user._id ? 'self-end bg-[#93d6fa] text-left' : 'self-start bg-[#9f90f3] text-left'} inline-block py-1 px-3 rounded-lg text-left`}>
+                      <div className={` break-words max-w-full ${message?.sender._id === user?._id ? 'self-end bg-[#93d6fa] text-left' : 'self-start bg-[#9f90f3] text-left'} inline-block py-1 px-3 rounded-lg text-left`}>
 
-                        <p className=' font-semibold text-[14px]'>{message?.sender._id === user._id ? 'you' : `${message.sender.name}`}</p>
+                        <p className=' font-semibold text-[14px]'>{message?.sender._id === user?._id ? 'you' : `${message.sender.name}`}</p>
                         <p className=' '>{message?.content || message?.content}</p>
                         <p className='text-[10px] text-right ml-6 mt-1'>{timeAgo}</p>
                       </div>
@@ -227,15 +227,15 @@ const Group = () => {
                 }
 
                 return (
-                  <div  key={message?._id} className={` ${message?.sender._id === user._id ? 'self-end max-w-[55%]' : ' flex self-start gap-x-2 max-w-[55%]'}`}>
-                    {message?.sender._id !== user._id &&
+                  <div  key={message?._id} className={` ${message?.sender._id === user?._id ? 'self-end max-w-[55%]' : ' flex self-start gap-x-2 max-w-[55%]'}`}>
+                    {message?.sender._id !== user?._id &&
                       <div className=' w-6 h-6 mt-1'>
                         <img className=' w-full h-full object-cover rounded-3xl' src={message?.sender?.avatar?.url} alt="sender dp" />
                       </div>
                     }
-                    <div  className={`${message?.sender._id === user._id ? 'self-end bg-[#93d6fa] text-left  break-words ' : 'self-start bg-[#9f90f3] text-left'} inline-block py-1 px-3 rounded-lg text-left max-w-full break-words`}>
+                    <div  className={`${message?.sender._id === user?._id ? 'self-end bg-[#93d6fa] text-left  break-words ' : 'self-start bg-[#9f90f3] text-left'} inline-block py-1 px-3 rounded-lg text-left max-w-full break-words`}>
 
-                      <p className=' font-semibold text-[14px]'>{message?.sender._id === user._id ? 'you' : `${message.sender.name}`}</p>
+                      <p className=' font-semibold text-[14px]'>{message?.sender._id === user?._id ? 'you' : `${message.sender.name}`}</p>
                       <p className=''>{message?.content || message?.content}</p>
                       <p className='text-[10px] text-right ml-6 mt-1'>{timeAgo}</p>
                     </div>

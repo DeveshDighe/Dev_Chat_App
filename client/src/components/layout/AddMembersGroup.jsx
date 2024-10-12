@@ -23,12 +23,12 @@ const AddMembersGroup = ({ usersToAdd,userNotInGroup, setUsersToAdd }) => {
     <div className=' w-full  border-[#e0e0e0]   overflow-auto h-[140px]  scroll mt-2'>{
     userNotInGroup.length ?
     userNotInGroup?.map((user) => (
-        <div key={user._id} className=' flex items-center py-1 gap-x-3  hover:bg-[#f5f5f5] border-[#e0e0e0] px-4 justify-between cursor-pointer'>
+        <div key={user?._id} className=' flex items-center py-1 gap-x-3  hover:bg-[#f5f5f5] border-[#e0e0e0] px-4 justify-between cursor-pointer'>
           <div className=' flex items-center gap-x-3'>
             <div className=' w-6 h-[1.6rem]'>
-              <img className='w-full h-full object-cover rounded-3xl' src={user.avatar.url} alt="Profile pic" />
+              <img className='w-full h-full object-cover rounded-3xl' src={user?.avatar.url} alt="Profile pic" />
             </div>
-            <span>{user.name}</span>
+            <span>{user?.name}</span>
           </div>
           <div>
             {

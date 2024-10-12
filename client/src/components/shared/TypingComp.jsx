@@ -57,7 +57,7 @@ const TypingComp = ({ members ,  chatID ,}) => {
   useEffect(()=>{
     if (message) {
       if (!isTyping) { 
-        socket.emit(TYPING_MESSAGE, {chatID, members, userName : user.name});
+        socket.emit(TYPING_MESSAGE, {chatID, members, userName : user?.name});
         setIsTyping(true);
       }
     }

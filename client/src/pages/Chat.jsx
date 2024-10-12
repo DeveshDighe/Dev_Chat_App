@@ -122,7 +122,7 @@ const Chat = () => {
       const isAtBottom = container && (container.scrollHeight - container.scrollTop - container.clientHeight < 50); // Threshold for being near bottom
 
       // Add the new message to the chat
-      if (data.message.sender._id === user._id) {
+      if (data.message.sender._id === user?._id) {
         playPopUpSound();
       }else{
         playPopUpSound2()
@@ -196,7 +196,7 @@ const Chat = () => {
                       return (
                         <span
                           key={`${message._id}-${index}`}
-                          className={`${message?.sender._id === user._id ? 'self-end bg-[#93d6fa]' : 'self-start bg-[#9f90f3]'} max-w-[55%] inline-block p-2 rounded-lg text-left`}
+                          className={`${message?.sender._id === user?._id ? 'self-end bg-[#93d6fa]' : 'self-start bg-[#9f90f3]'} max-w-[55%] inline-block p-2 rounded-lg text-left`}
                         >
                           <div className='flex flex-col'>
                             <p className='text-wrap break-words'>{message?.content || message?.content}</p>
@@ -225,7 +225,7 @@ const Chat = () => {
                     return (
                       <span
                         key={`${message._id}-${index}`}
-                        className={`${message?.sender._id === user._id ? 'self-end bg-[#93d6fa] max-w-[55%]' : 'self-start bg-[#9f90f3]'} max-w-[55%] inline-block p-2 rounded-lg text-left`}
+                        className={`${message?.sender._id === user?._id ? 'self-end bg-[#93d6fa] max-w-[55%]' : 'self-start bg-[#9f90f3]'} max-w-[55%] inline-block p-2 rounded-lg text-left`}
                       >
                         <div className='flex flex-col'>
                           <p className='text-wrap break-words'>{message?.content || message?.content}</p>

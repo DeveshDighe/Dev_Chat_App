@@ -61,12 +61,12 @@ const CreateGroup = () => {
   }, [name])
   
   const handleAddMember = (user) => {
-    if (!members.find((member) => member._id === user._id)) {
+    if (!members.find((member) => member._id === user?._id)) {
       setMembers([...members, user]);
     }
   };
   const handleRemoveMember = (user) => {
-    const usersAfterFilter = members.filter((member)=> member._id !== user._id);
+    const usersAfterFilter = members.filter((member)=> member._id !== user?._id);
     setMembers(usersAfterFilter);
   };
 
@@ -140,7 +140,7 @@ const CreateGroup = () => {
             </div>
             :
             data?.users.map((user)=> (
-              <div key={user._id} className=' cursor-pointer hover:bg-white py-1' onClick={() => handleAddMember(user)}>{user.name}</div>
+              <div key={user?._id} className=' cursor-pointer hover:bg-white py-1' onClick={() => handleAddMember(user)}>{user?.name}</div>
             ))
           }
         </div>

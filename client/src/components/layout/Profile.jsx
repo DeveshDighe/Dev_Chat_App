@@ -39,22 +39,22 @@ const Profile = () => {
   return (
     <div className='py-4 min-h-full bg-[#f5f5f5] flex flex-col'>
       <div className='w-44 h-44 rounded-full border overflow-hidden mx-auto'>
-        <img onClick={handleImageClick} className='w-full h-full object-cover' src={user.avatar.url} alt="profile pic" />
+        <img onClick={handleImageClick} className='w-full h-full object-cover' src={user?.avatar.url} alt="profile pic" />
       </div>
       <Dialog open={imageClicked} onClose={handleImageClick}>
-        <img className='w-96 h-full' src={user.avatar.url} alt="Profile Pic" />
+        <img className='w-96 h-full' src={user?.avatar.url} alt="Profile Pic" />
       </Dialog>
       <div className='bg-white p-1 px-4 my-4'>
         <p className='text-[#9d40ff] py-1'>your name</p>
-        <p className='py-2'>{user.name}</p>
+        <p className='py-2'>{user?.name}</p>
       </div>
       <div className='bg-white p-1 px-4 my-4'>
         <p className='text-[#9d40ff] py-1'>username</p>
-        <p className='py-2'>{user.username}</p>
+        <p className='py-2'>{user?.username}</p>
       </div>
       <div className='bg-white p-1 px-4 my-4'>
         <p className='text-[#9d40ff] py-1'>bio</p>
-        <p className='py-2'>{user.bio}</p>
+        <p className='py-2'>{user?.bio}</p>
       </div>
       <div className='bg-white p-1 px-4 my-4'>
         <p onClick={handleLogOutClick} className='text-[#ff4040] py-1 cursor-pointer'>Logout</p>

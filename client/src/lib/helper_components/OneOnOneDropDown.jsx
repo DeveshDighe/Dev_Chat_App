@@ -23,7 +23,7 @@ const OneOnOneDropDown = ({ content = [], User }) => {
       </ul>
       <Dialog open={visitProfile} onClose={() => setVisitProfile(false)}>
         <div className=' w-[300px] max-custom-xSmall:w-[220px] max-custom-lastSmall:w-[190px]'>
-        <UserProfile userID={User._id} setVisitProfileClicked={setVisitProfileClicked} setVisitProfile={setVisitProfile}/>
+        <UserProfile userID={User?._id} setVisitProfileClicked={setVisitProfileClicked} setVisitProfile={setVisitProfile}/>
         </div>
       </Dialog>
     </>

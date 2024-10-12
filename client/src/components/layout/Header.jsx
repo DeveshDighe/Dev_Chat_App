@@ -156,7 +156,7 @@ const Header = () => {
                     objectFit: 'contain',
 
                   }}
-                    src={user.avatar.url}
+                    src={user?.avatar?.url}
                   />
                 </IconButton>
               </Tooltip>

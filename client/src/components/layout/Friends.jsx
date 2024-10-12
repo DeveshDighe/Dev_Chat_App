@@ -10,7 +10,7 @@ const Friends = () => {
   const { mutate } = sendFriendRequest();
 
   const handleSendFriendRequest = (user) => {
-    mutate(user._id)
+    mutate(user?._id)
   }
 
   return (
@@ -18,12 +18,12 @@ const Friends = () => {
       usersSearch.length>0
         ?
       usersSearch.map((user) => (
-        <div key={user._id} className=' flex items-center py-2 gap-x-3  border-b hover:bg-[#f5f5f5] border-[#e0e0e0] px-4 justify-between cursor-pointer'>
+        <div key={user?._id} className=' flex items-center py-2 gap-x-3  border-b hover:bg-[#f5f5f5] border-[#e0e0e0] px-4 justify-between cursor-pointer'>
           <div className=' flex items-center gap-x-3'>
             <div className=' w-6 h-[1.6rem]'>
-              <img className='w-full h-full object-cover rounded-3xl' src={user.avatar} alt="Profile pic" />
+              <img className='w-full h-full object-cover rounded-3xl' src={user?.avatar} alt="Profile pic" />
             </div>
-            <span>{user.name}</span>
+            <span>{user?.name}</span>
           </div>
           <div>
 

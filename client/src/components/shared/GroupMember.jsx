@@ -64,7 +64,7 @@ const GroupMember = ({ member, creator, admins, moreClicked, setMoreClicked, set
       </div>
       <div className='cursor-pointer relative' ref={moreRef}>
         <MoreHorizIcon sx={{ color: '#3a3a3a' }} onClick={handleMoreClicked} />
-        {(user._id === creator._id || isAdmin) ? (  // Check if the user is the creator or an admin
+        {(user?._id === creator._id || isAdmin) ? (  // Check if the user is the creator or an admin
           <>
             {moreClicked?._id === member?._id && ( // Check if the dropdown is open for this member
               member._id === creator._id ? (  // Check if the member is the creator
@@ -91,11 +91,11 @@ const GroupMember = ({ member, creator, admins, moreClicked, setMoreClicked, set
         ) : (
           moreClicked?._id === member?._id && ( // Check if the dropdown is open for this member
             <div className='absolute text-sm w-28 border top-5 left-[-40px] bg-white z-10 rounded-md border-gray-400 overflow-hidden'>
-              {!isAdmin && member._id !== user._id && (
+              {!isAdmin && member._id !== user?._id && (
                 <p className='py-1 hover:bg-[#f1f1f1] text-green-500' onClick={handleMakeAdminClick}>Make Admin</p>
               )}
               <p className='py-1 hover:bg-[#f1f1f1]' onClick={handleProfileClick}>Visit Profile</p>
-              {!isAdmin && member._id !== user._id && (
+              {!isAdmin && member._id !== user?._id && (
                 <p className='py-1 hover:bg-[#f1f1f1] text-red-600' onClick={handleUserRemove}>Remove</p>
               )}
               

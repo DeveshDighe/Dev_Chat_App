@@ -14,7 +14,7 @@ const AttachmentsMap = ({attachments, message, user, timeAgo}) => {
         <div
           key={attachment.public_id} // Ensure uniqueness by using the public_id for attachments
           className={`${
-            message?.sender._id === user._id
+            message?.sender._id === user?._id
               ? 'self-end bg-[#93d6fa] text-left '
               : 'self-start bg-[#9f90f3] text-left'
           } inline-block p-2 rounded-lg text-left max-w-[55%]`}

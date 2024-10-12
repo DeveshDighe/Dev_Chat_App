@@ -50,7 +50,7 @@ const EditGroup = () => {
     setUsersToAdd([]);
   };
   const handleAddToGroup = () => {
-    const memberIds = usersToAdd.map((user) => user._id);
+    const memberIds = usersToAdd.map((user) => user?._id);
     const dataToAddUser = { chatID: groupID, members: memberIds }
     mutate(dataToAddUser);
     setAddMembersClicked(false);
@@ -224,7 +224,7 @@ const EditGroup = () => {
                   ))}
                 </div>
                 {
-                chatDetail?.creator._id === user._id && <button className=' py-0 px-2 rounded-md border mt-8 hover:bg-green-400 bg-green-500 text-white' onClick={() => setAddMembersClicked(true)}>Add members</button>
+                chatDetail?.creator._id === user?._id && <button className=' py-0 px-2 rounded-md border mt-8 hover:bg-green-400 bg-green-500 text-white' onClick={() => setAddMembersClicked(true)}>Add members</button>
                 }
               </>
           }
