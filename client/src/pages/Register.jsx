@@ -13,7 +13,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { registerUser } from '../tanstack/user_logic';
 import ClipLoader from 'react-spinners/ClipLoader';
 
-const Register = ({user}) => {
+const Register = ({user, token}) => {
   const [showPass, setShowPass] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [creatingUser, setCreatingUser] = useState(false);
@@ -30,7 +30,7 @@ const Register = ({user}) => {
     }
   }, [isError]);
   
-  if (user) {
+  if (token) {
     return <Navigate to={'/'} />
     
   }

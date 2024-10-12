@@ -11,7 +11,7 @@ import { loginSchema } from '../utils/yup';
 import { loginUser } from '../tanstack/user_logic';
 
 
-const Login = ({ user }) => {
+const Login = ({ user, token }) => {
   const [showPass, setShowPass] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
 
@@ -30,7 +30,7 @@ const Login = ({ user }) => {
   const { mutate } = loginUser();
 
 
-  if (user) {
+  if (token) {
     return <Navigate to={'/'} />
 
   }

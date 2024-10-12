@@ -7,14 +7,14 @@ import { IoMdEyeOff } from "react-icons/io";
 import { loginFormik } from '../../lib/formikLogic';
 import { Navigate, useNavigate } from 'react-router-dom';
 
-const AdminLogin = ({user}) => {
+const AdminLogin = ({user, token}) => {
   const [showPass, setShowPass] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const { errors, values, handleSubmit, handleChange, touched } =loginFormik();
 
 
 
-  if (user) {
+  if (token) {
     return <Navigate to={'/admin/dashboard'} />
     
   }

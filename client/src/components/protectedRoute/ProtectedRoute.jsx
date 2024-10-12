@@ -23,7 +23,7 @@ import CreateGroup from '../layout/CreateGroup';
 const Header = lazy(() => import('../../components/layout/Header'));
 const NotFound = lazy(() => import('../../pages/NotFound'));
 
-const ProtectedRoute = ({ user }) => {
+const ProtectedRoute = ({ user , token}) => {
   const param = useParams();
   const { '*': paramString } = param;
   const [isDrawerOpen, setDrawerOpen] = useState(false); // State for Drawer
@@ -104,7 +104,7 @@ const ProtectedRoute = ({ user }) => {
 
   useSocketEvents(socket, eventHandler);
 
-  if (!user) {
+  if (!token) {
     return <Navigate to={'/login'} />;
   }
 

@@ -7,9 +7,11 @@ import { useSelector } from 'react-redux';
 import { getUserData } from './tanstack/user_logic';
 import {Toaster} from 'react-hot-toast';
 import {SocketProvider} from './utils/socket'
+import Login from '../src/pages/Login'
+import Register from '../src/pages/Register'
 
-const Login = lazy(() => import('./pages/Login'));
-const Register = lazy(() => import('./pages/Register'));
+// const Login = lazy(() => import('./pages/Login'));
+// const Register = lazy(() => import('./pages/Register'));
 const DashBoard = lazy(() => import('./pages/admin/DashBoard'));
 const MessageManagement = lazy(() => import('./pages/admin/MessageManagement'));
 const UsersManagement = lazy(() => import('./pages/admin/UserManagement'));
@@ -18,6 +20,8 @@ const ChatsManagement = lazy(() => import('./pages/admin/ChatManagement'));
 
 const App = () => {
   const { user, loader } = useSelector((state) => state.authReducer);
+
+  const token = localStorage.getItem('User-Token');
 
   const { data, error } = getUserData();
 
@@ -29,9 +33,9 @@ const App = () => {
       <BrowserRouter>
         <Suspense fallback={<Loders />}>
           <Routes>
-            <Route path='/login' element={<Login user={user} />} />
-            <Route path='/register' element={<Register user={user} />} />
-            <Route path='/admin/login' element={<AdminLogin user={user} />} />
+            <Route path='/login' element={<Login user={user} token={token} />} />
+            <Route path='/register' element={<Register user={user} token={token}/>} />
+            <Route path='/admin/login' element={<AdminLogin user={user} token={token} />} />
             <Route path='/admin/dashboard' element={<DashBoard />} />
             <Route path='/admin/users' element={<UsersManagement />} />
             <Route path='/admin/messages' element={<MessageManagement />} />
@@ -39,7 +43,7 @@ const App = () => {
             <Route path='*' 
             element={
               
-                <ProtectedRoute user={user} />
+                <ProtectedRoute user={user} token={token} />
 
               } />
           </Routes>
