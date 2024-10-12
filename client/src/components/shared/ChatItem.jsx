@@ -31,7 +31,6 @@ const ChatItem = ({ avatar = [], name, _id, groupImg, Lastmessage, groupChat, is
     }
   }
 
-  console.log(userStatus, 'status[][][][]');
   
   return (
     <div className='flex items-center gap-x-3 pl-2 pt-1 max-sm:pt-[0.3rem] hover:bg-[#f1f1f1]'>

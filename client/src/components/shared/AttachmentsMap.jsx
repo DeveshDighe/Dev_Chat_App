@@ -3,7 +3,6 @@ import { fileFormat } from '../../lib/features';
 import RenderAttachment from '../../lib/helper_components/RenderAttachment';
 
 const AttachmentsMap = ({attachments, message, user, timeAgo}) => {
-  console.log(attachments , ' This is attachments');
   
   return (
     <>

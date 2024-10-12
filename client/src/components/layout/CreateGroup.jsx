@@ -115,7 +115,7 @@ const CreateGroup = () => {
             </>
           </IconButton>
         </Stack>
-        <div className=' flex gap-x-2 flex-wrap gap-y-2 mb-3 scroll'>
+        <div className=' flex gap-x-2 justify-center flex-wrap gap-y-2 mb-3 scroll'>
           {members.map((member)=>(
             <div key={member._id} className=' py-0 px-2 rounded-sm flex gap-x-1 bg-red-300 items-center'>
               <p>{member.name}</p>

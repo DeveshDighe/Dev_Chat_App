@@ -17,6 +17,7 @@ import { addMessageCountAndNewMessage } from '../redux/reducers/chats';
 import { useMediaQuery } from '@mui/material';
 import ChatLoading from '../components/shared/ChatLoading';
 import ClipLoader from "react-spinners/ClipLoader";
+import { playPopUpSound, playPopUpSound2 } from '../lib/helper';
 
 const Group = () => {
   const [page, setPage] = useState(1);
@@ -29,7 +30,7 @@ const Group = () => {
   let groupEditClicked = false;
 
   const { refetch, data, isLoading } = getChatDetail(groupID, true);
-  const { refetch: refetchMessages, data: messageData } = getMessages(groupID, page);
+  const { refetch: refetchMessages, data: messageData , isFetching: messagesLoading} = getMessages(groupID, page);
   const { user } = useSelector((state) => state.authReducer);
   const { oldMessages } = useSelector((state) => state.usefullReducer);
   const { uploadingLoader } = useSelector((state) => state.randomReducer);
@@ -113,6 +114,11 @@ const Group = () => {
 
 
       setAllMessages((prevData) => [...prevData, newMessage]);
+      if (data.message.sender._id === user._id) {
+        playPopUpSound();
+      }else{
+        playPopUpSound2()
+      }
       data = { ...data, currentChatID: groupID }
       dispatch(addMessageCountAndNewMessage(data));
       
@@ -149,6 +155,7 @@ const Group = () => {
 
 
   const memberIds = data?.data?.members?.map((member) => member._id) || [];
+  console.log(messagesLoading , ',mes');
 
 
   return (
@@ -160,9 +167,16 @@ const Group = () => {
         <div ref={containerRef} className="flex flex-col flex-grow space-y-4 p-4 px-1 overflow-auto relative scroll">
           {
             isSmallScreen
-              ? allMessages.length < 1
+            ? messagesLoading
                 ? <ChatLoading />
-                :
+                : allMessages.length < 1
+                ?
+                <div className='flex justify-center'>
+                      <span className='bg-[#ffea9c] text-[#545454] text-center px-4 rounded-md'>
+                        Start conversation with friends
+                      </span>
+                    </div>
+                    :
                 allMessages.map((message, index) => {
                   const timeAgo = moment(message.createdAt).fromNow();
 

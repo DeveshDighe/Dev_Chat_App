@@ -54,14 +54,8 @@ const usefullReducer = createSlice({
       state.oldMessages = [];
       
     },
-    setAttachments : (state, action) => {
-      state.attachments = action.payload;
-    },
-    removeAttachments : (state) => {
-      state.attachments = null
-    }
   }
 })
 
-export const {setNotificationsList, removeNotificationsList, setHasMoreData , setAllMessages, removeAllMessages,setActiveChatID, setAttachments , removeAttachments} = usefullReducer.actions;
+export const {setNotificationsList, removeNotificationsList, setHasMoreData , setAllMessages, removeAllMessages,setActiveChatID} = usefullReducer.actions;
 export default usefullReducer.reducer; 

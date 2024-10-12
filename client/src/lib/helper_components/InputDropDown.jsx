@@ -1,16 +1,13 @@
 import React, { memo, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
-import { setUploadingLoader } from '../../redux/reducers/random';
-import { sendAttachment } from '../../tanstack/chats_logic';
-import { setAttachments } from '../../redux/reducers/usefull';
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
 import FilePresentOutlinedIcon from '@mui/icons-material/FilePresentOutlined';
 import VideoCameraBackOutlinedIcon from '@mui/icons-material/VideoCameraBackOutlined';
 import AudioFileOutlinedIcon from '@mui/icons-material/AudioFileOutlined';
 import VideoCameraBackIcon from '@mui/icons-material/VideoCameraBack';
 
-const InputDropDown = ({ onFileSelect, setSelectedAttachments, selectedAttachments, chatID, content }) => {
+const InputDropDown = ({ onFileSelect, setSelectedAttachments, selectedAttachments, chatID, content , setAttchmentData}) => {
 
   const imageInputRef = useRef(null);
   const audioInputRef = useRef(null);
@@ -46,7 +43,7 @@ const InputDropDown = ({ onFileSelect, setSelectedAttachments, selectedAttachmen
     files.forEach((file) => myForm.append('files', file));
 
     setSelectedAttachments(`${files.length} ${type} selected`);
-    dispatch(setAttachments(myForm));
+    setAttchmentData(myForm);
 
     // onFileSelect(files); // Pass the selected files to the parent component
   };

@@ -22,8 +22,6 @@ const ChattingWith = ({chattingWith, userTyping}) => {
   const moreClicked = () => {
     setIconClicked(prev => !prev)
   }
-  console.log(User?.status, 'User.status');
-  
   
   return (
     <div className=' flex justify-between h-full bg-[#eff3f6] py-1 px-4'>

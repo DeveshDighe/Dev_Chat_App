@@ -37,7 +37,7 @@ export const loginSchema = yup.object({
   name: yup
     .string()
     .matches(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces")
-    .min(6)
+    .min(2)
     .max(20)
     .required('Please enter your name'),
   

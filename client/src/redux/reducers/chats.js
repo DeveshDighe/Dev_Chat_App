@@ -48,10 +48,8 @@ const chatReducer = createSlice({
     addMessageCountAndNewMessage: (state, action) => {
       const { chatID, message, currentChatID } = action.payload;
     
-      console.log(chatID, message, currentChatID, 'This is chatID, message, currentChatID');
-    
+
       const chatIndex = state.chatsList.findIndex(chat => chat._id === chatID);
-      console.log(chatIndex, 'This is chatIndex');
     
       if (chatIndex !== -1) {
         const chat = state.chatsList[chatIndex];
@@ -69,8 +67,7 @@ const chatReducer = createSlice({
         state.chatsList.unshift(updatedChat); // Add it to the top
     
         // Log the updated state of chatsList
-        console.log('After updating:', JSON.stringify(state.chatsList, null, 2));
-        
+              
       }
 
       const localData = localStorage.getItem('chatData');
@@ -113,8 +110,6 @@ const chatReducer = createSlice({
       })
 
       if (state.chatDetail !== null) {
-        console.log(JSON.stringify(state.chatDetail), 'lplplp');
-        
         state.chatDetail[0] = {
           ...state.chatDetail[0], // Spread the existing properties of the first element
           status: "ONLINE"        // Add the new status property
@@ -124,8 +119,6 @@ const chatReducer = createSlice({
     },
     chatDeactive : (state, action) => {
       state.chatsList = state.chatsList.map((chat)=>{
-        console.log('Plain chat object:', JSON.parse(JSON.stringify(chat)));
-        
         if (chat.members._id === action.payload._id) {
           
           return {...chat, members: {
@@ -136,9 +129,7 @@ const chatReducer = createSlice({
         return chat;
       })
 
-      if (state.chatDetail !== null) {
-        console.log(JSON.stringify(state.chatDetail), 'lplplp');
-        
+      if (state.chatDetail !== null) {   
         state.chatDetail[0] = {
           ...state.chatDetail[0], // Spread the existing properties of the first element
           status: "OFFLINE"        // Add the new status property
@@ -179,16 +170,11 @@ const chatReducer = createSlice({
     addChatDetail: (state, action) => {
       state.chatDetail = action.payload;
     },
-    addChatDetail: (state, action) => {
-      console.log(action.payload , 'This is action payload of chatDetail');
-      
+    addChatDetail: (state, action) => { 
       state.chatDetail = action.payload;
     },
     removeChatDetail: (state) => {
-      console.log(state.chatDetail , 'erere54545454545777777777777777777777777777777777777777777777777777777777777777');
-      
       state.chatDetail = null;
-      console.log(state.chatDetail , '6767777678888888888888888888888888888888888888888888888888888888888888888888888');
     }
   }
 });

@@ -64,23 +64,18 @@ const getMyChat = async (req, res) => {
   const searchTerm = req.query.search;
   let filter = req.query.filter;
 
-console.log('getMy Chat hited', filter);
-
-
   let chats;
 
   try {
     
     if (searchTerm || (filter === 'Groups' || filter === 'Chats')) {
       
-      console.log(1);
       let groupChat;
       if (filter === 'Groups' || filter === 'All') {
         groupChat = true;
       } else {
         groupChat = false;
       }
-      console.log(groupChat , 'This is groupChat');
       
       chats = await Chat.find({ members: req.userID, 'name': { $regex: searchTerm, $options: 'i' }, groupChat: groupChat })
         .populate('members', 'name avatar status')
@@ -92,11 +87,9 @@ console.log('getMy Chat hited', filter);
           },
         }).sort({ latestMessageTime: -1 });
 
-        console.log(chats, 'chats');
         
       //populate only name  and avatar
     } else {
-console.log(2);
 
       chats = await Chat.find({ members: req.userID })
         .populate('members', 'name avatar status')
@@ -110,7 +103,6 @@ console.log(2);
 
       //populate only name  and avatar
     }
-console.log(chats, 'This is chat89898');
 
     let allChats = [];
 
@@ -148,7 +140,7 @@ console.log(chats, 'This is chat89898');
     //   }
     // })
     // console.log(allChats, 'Theese are all chats');
-console.log(allChats , 'This is all Catas');
+
 
     res.status(200).json({ status: 'success', message: 'All chats fetched', chats: allChats })
 
@@ -189,7 +181,6 @@ const addMembers = async (req, res) => {
 
     const { chatID, members } = req.body;
 
-    console.log(chatID, members, '[][]][][][][');
 
     const chat = await Chat.findById(chatID);
 
@@ -428,9 +419,6 @@ const getChatDetails = async (req, res) => {
       return res.status(200).json({ status: 'success', message: 'Chats fetched', data: chat })
     }
     else {
-
-      console.log('rerer');
-      
       const chat = await Chat.findById(chatID);
 
 
@@ -599,8 +587,6 @@ const getMessages = async (req, res) => {
     const totalPages = Math.ceil(messagesCount / limit);
     const hasMore = page < totalPages;
 
-    // console.log(messages.reverse(), 'messages.reverse()',messages.length);
-
     res.status(200).json({
       status: 'success',
       message: 'Messages fetched',
@@ -627,8 +613,6 @@ const changeGroupName = async (req, res) => {
     }
 
     const group = await Chat.findByIdAndUpdate(groupID, { name: name }, { new: true })
-
-    console.log(group, 'this is edited group');
     res.status(200).json({
       status: 'success',
       message: 'Group name updated',
@@ -643,9 +627,6 @@ const makeAdmin = async (req, res) => {
 
 
     const {groupID, userID} = req.query;
-
-    console.log(userID, groupID , 'userID groupID');
-    
 
     if (!groupID) {
       throw new Error('Group id required')
@@ -662,7 +643,6 @@ const makeAdmin = async (req, res) => {
     group.admin = [...group.admin, userID]
 
     await group.save()
-    console.log(group, 'this is edited group');
     res.status(200).json({
       status: 'success',
       message: 'Promoted to admin',
@@ -678,9 +658,6 @@ const removeAdmin = async (req, res) => {
 
 
     const {groupID, userID} = req.query;
-
-    console.log(userID, groupID , 'userID groupID');
-    
 
     if (!groupID) {
       throw new Error('Group id required')

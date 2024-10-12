@@ -27,9 +27,7 @@ const SocketProvider = ({ children }) => {
 
   // Function to connect the socket
   const connectSocket = () => {
-    if (!socket.connected) {
-      console.log('ererer ytrtrtrttrtrt');
-      
+    if (!socket.connected) {  
       socket.connect();
       // socket.emit(USER_OFFLINE, user);
       console.log('Socket connected');

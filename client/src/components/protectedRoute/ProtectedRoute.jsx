@@ -42,9 +42,7 @@ const ProtectedRoute = ({ user }) => {
   const isXsSmallScreen = useMediaQuery('(max-width: 550px)'); // Detect screen size
 
   const NewMessageListener = useCallback(
-    (data) => {
-      console.log(data, 'data of');
-      
+    (data) => {  
       if (data.message.sender._id !== user._id && data.chatID !== activeChatID) {
         dispatch(addMessageCountAndNewMessage(data));
       }
@@ -82,14 +80,12 @@ const ProtectedRoute = ({ user }) => {
   );
   const userOnlineListener = useCallback(
     (data) => {
-      console.log('user online listener data', data);
       dispatch(chatActive(data))
     },
     [dispatch]
   );
   const userOfflineListener = useCallback(
     (data) => {
-      console.log('user online listener data', data);
       dispatch(chatDeactive(data))
     },
     [dispatch]
@@ -212,7 +208,7 @@ const ProtectedRoute = ({ user }) => {
             ) : (
               // Show chat or group content if chatID or groupID is present
               <div className='conta2 border col-span-8 max-custom-mdb:col-span-8 '>
-                <Suspense fallback={<div>Loading....</div>}>
+                {/* <Suspense fallback={<div>Loading....</div>}> */}
                   <Routes>
                     <Route path='/' element={<Empty />} />
                     <Route path='/chat/:chatID' element={<Chat />} />
@@ -220,7 +216,7 @@ const ProtectedRoute = ({ user }) => {
                     <Route path='/group/Edit/:groupID' element={<EditGroup />} />
                     <Route path='*' element={<NotFound />} />
                   </Routes>
-                </Suspense>
+                {/* </Suspense> */}
               </div>
             )}
           </>

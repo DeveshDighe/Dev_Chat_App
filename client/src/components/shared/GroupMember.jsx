@@ -6,8 +6,6 @@ import { useParams } from 'react-router-dom';
 
 
 const GroupMember = ({ member, creator, admins, moreClicked, setMoreClicked, setVisitProfileClicked }) => {
-  console.log('usmememe', member);
-  console.log('admins', admins);
 
   const { user } = useSelector((state) => state.authReducer);
   const moreRef = useRef();
@@ -27,7 +25,6 @@ const GroupMember = ({ member, creator, admins, moreClicked, setMoreClicked, set
   };
 
   const handleMakeAdminClick = () => {
-    console.log('Make Admin clicked', member._id);
     const groupIDandUserID = { groupID: groupID, userID: member._id }
     makeAdminMutate(groupIDandUserID);
     setMoreClicked(null);

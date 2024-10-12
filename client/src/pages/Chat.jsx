@@ -15,6 +15,7 @@ import { addMessageCountAndNewMessage, removeChatDetail } from '../redux/reducer
 import ChatLoading from '../components/shared/ChatLoading';
 import { useMediaQuery } from '@mui/material';
 import ClipLoader from 'react-spinners/ClipLoader';
+import {playPopUpSound, playPopUpSound2} from '../lib/helper.js'
 
 const Chat = () => {
   const [page, setPage] = useState(1);
@@ -34,7 +35,7 @@ const Chat = () => {
   const chattingWith = chatDetail
 
   const { refetch, data, isLoading } = getChatDetail(chatId, true);
-  const { refetch: refetchMessages, data: messageData, isLoading: messagesLoading } = getMessages(chatId, page);
+  const { refetch: refetchMessages, data: messageData, isFetching: messagesLoading } = getMessages(chatId, page);
   const isSmallScreen = useMediaQuery('(max-width: 650px)'); // Detect screen size
 
   const isInitialLoad = useRef(true);
@@ -112,6 +113,8 @@ const Chat = () => {
   // Handle new messages from socket
   const messageListener = useCallback((data) => {
 
+    console.log(data, chatId , 'popo');
+    
     if (data.message.chat === chatId) {
       const newMessage = data.message;
       // Check if user is at or near the bottom
@@ -119,6 +122,11 @@ const Chat = () => {
       const isAtBottom = container && (container.scrollHeight - container.scrollTop - container.clientHeight < 50); // Threshold for being near bottom
 
       // Add the new message to the chat
+      if (data.message.sender._id === user._id) {
+        playPopUpSound();
+      }else{
+        playPopUpSound2()
+      }
       setAllMessages((prevData) => [...prevData, newMessage]);
 
       // If the user was at the bottom, scroll to the bottom after message is added
@@ -136,8 +144,6 @@ const Chat = () => {
   }, [chatId]);
 
   const TypingMessageListener = useCallback((data) => {
-    console.log(data, 'This is typing data');
-
     setUserTyping(true);
   }, [chatId]);
 
@@ -156,7 +162,7 @@ const Chat = () => {
 
   const memberIds = data?.data?.members?.map((member) => member._id) || [];
 
-  console.log(chattingWith, 'chatting With');
+console.log(messagesLoading , ',mes');
 
 
   return (
@@ -168,65 +174,68 @@ const Chat = () => {
         <div ref={containerRef} className={`flex flex-col flex-grow space-y-2 p-4 overflow-auto relative scroll max-md:px-1 ${allMessages.length < 1 && 'px-1'}`}>
           {
             isSmallScreen
-              ? allMessages.length < 1
-                ? <ChatLoading />
+              ? messagesLoading
+                ? <ChatLoading /> // Show loader while messages are loading
+                : allMessages?.length < 1
+                  ? <div className='flex justify-center'>
+                      <span className='bg-[#ffea9c] text-[#545454] text-center px-4 rounded-md'>
+                        Start conversation with {chattingWith && chattingWith[0]?.name}
+                      </span>
+                    </div>
+                  : allMessages.map((message, index) => {
+                      const timeAgo = moment(message.createdAt).fromNow();
+  
+                      if (message.attachements && message.attachements.length > 0) {
+                        const attachments = message.attachements;
+                        return (
+                          <React.Fragment key={`${message._id}-${index}`}>
+                            <AttachmentsMap attachments={attachments} message={message} user={user} timeAgo={timeAgo} />
+                            {message?.content && <AttachmentContent user={user} message={message} timeAgo={timeAgo} />}
+                          </React.Fragment>
+                        );
+                      }
+  
+                      return (
+                        <span
+                          key={`${message._id}-${index}`}
+                          className={`${message?.sender._id === user._id ? 'self-end bg-[#93d6fa]' : 'self-start bg-[#9f90f3]'} max-w-[55%] inline-block p-2 rounded-lg text-left`}
+                        >
+                          <div className='flex flex-col'>
+                            <p className='text-wrap break-words'>{message?.content || message?.content}</p>
+                            <p className='text-[10px] text-right mt-1'>{timeAgo}</p>
+                          </div>
+                        </span>
+                      );
+                    })
+              : allMessages.length < 1
+                ? <div className=' flex justify-center'>
+                    <span className=' bg-[#ffea9c] text-[#545454] text-center px-4 rounded-md'>Start conversation with {chattingWith && chattingWith[0]?.name}</span>
+                  </div>
                 : allMessages.map((message, index) => {
-                  const timeAgo = moment(message.createdAt).fromNow();
-
-                  if (message.attachements && message.attachements.length > 0) {
-                    const attachments = message.attachements;
+                    const timeAgo = moment(message.createdAt).fromNow();
+  
+                    if (message.attachements && message.attachements.length > 0) {
+                      const attachments = message.attachements;
+                      return (
+                        <React.Fragment key={`${message._id}-${index}`}>
+                          <AttachmentsMap attachments={attachments} message={message} user={user} timeAgo={timeAgo} />
+                          {message?.content && <AttachmentContent user={user} message={message} timeAgo={timeAgo} />}
+                        </React.Fragment>
+                      );
+                    }
+  
                     return (
-                      <React.Fragment key={`${message._id}-${index}`}>
-                        <AttachmentsMap attachments={attachments} message={message} user={user} timeAgo={timeAgo} />
-                        {message?.content && <AttachmentContent user={user} message={message} timeAgo={timeAgo} />}
-                      </React.Fragment>
+                      <span
+                        key={`${message._id}-${index}`}
+                        className={`${message?.sender._id === user._id ? 'self-end bg-[#93d6fa] max-w-[55%]' : 'self-start bg-[#9f90f3]'} max-w-[55%] inline-block p-2 rounded-lg text-left`}
+                      >
+                        <div className='flex flex-col'>
+                          <p className='text-wrap break-words'>{message?.content || message?.content}</p>
+                          <p className='text-[10px] text-right mt-1'>{timeAgo}</p>
+                        </div>
+                      </span>
                     );
-                  }
-
-                  return (
-                    <span
-                      key={message?._id}
-                      className={`${message?.sender._id === user._id ? 'self-end bg-[#93d6fa]' : 'self-start bg-[#9f90f3]'} max-w-[55%] inline-block p-2 rounded-lg text-left`}
-                    >
-                      <div className='flex flex-col'>
-                        <p className='text-wrap break-words'>{message?.content || message?.content}</p>
-                        <p className='text-[10px] text-right mt-1'>{timeAgo}</p>
-                      </div>
-                    </span>
-                  );
-                })
-              :
-              allMessages.length < 1
-                ?
-                <div className=' flex justify-center'>
-                  <span className=' bg-[#ffea9c] text-[#545454] text-center px-4 rounded-md'>Start conversation with {chattingWith && chattingWith[0]?.name}</span>
-                </div>
-                :
-                allMessages.map((message, index) => {
-                  const timeAgo = moment(message.createdAt).fromNow();
-
-                  if (message.attachements && message.attachements.length > 0) {
-                    const attachments = message.attachements;
-                    return (
-                      <React.Fragment key={`${message._id}-${index}`}>
-                        <AttachmentsMap attachments={attachments} message={message} user={user} timeAgo={timeAgo} />
-                        {message?.content && <AttachmentContent user={user} message={message} timeAgo={timeAgo} />}
-                      </React.Fragment>
-                    );
-                  }
-
-                  return (
-                    <span
-                      key={message?._id}
-                      className={`${message?.sender._id === user._id ? 'self-end bg-[#93d6fa] max-w-[55%]' : 'self-start bg-[#9f90f3]'} max-w-[55%] inline-block p-2 rounded-lg text-left`}
-                    >
-                      <div className='flex flex-col'>
-                        <p className='text-wrap break-words'>{message?.content || message?.content}</p>
-                        <p className='text-[10px] text-right mt-1'>{timeAgo}</p>
-                      </div>
-                    </span>
-                  );
-                })
+                  })
           }
         </div>
         <div className='h-14'>
@@ -244,6 +253,7 @@ const Chat = () => {
       </div>
     </div>
   );
+  
 
 };
 

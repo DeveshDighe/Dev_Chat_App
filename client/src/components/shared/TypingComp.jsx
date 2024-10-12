@@ -9,13 +9,13 @@ import { NEW_MESSAGE, TYPING_MESSAGE, TYPING_SOPPED_MESSAGE } from '../../consta
 import InputDropDown from '../../lib/helper_components/InputDropDown';
 import { sendAttachment } from '../../tanstack/chats_logic';
 import { useDispatch, useSelector } from 'react-redux';
-import { removeAttachments } from '../../redux/reducers/usefull';
 import { setUploadingLoader } from '../../redux/reducers/random';
 import { messageSenderChatTop } from '../../redux/reducers/chats';
 
 const TypingComp = ({ members ,  chatID ,}) => {
   const {socket} = getSocket();
   const [selectedAttachments , setSelectedAttachments] = useState('')
+  const [attchmentData , setAttchmentData] = useState(null)
   const [message, setmessage] = useState('');
   const [fileClicked, setfileClicked] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -30,21 +30,17 @@ const TypingComp = ({ members ,  chatID ,}) => {
 
   const handleAttachFile = () => {
     setfileClicked(prev => !prev);
-    console.log(attachments , 'attachments attachments');
-    
   }
   const handleSend = () => {
     // e.preventDefault();
     setfileClicked(false);
-    console.log(attachments , 'This is attaCHMENT');
-
-    if (attachments!==null) {
+    if (attchmentData!==null) {
       
       dispatch(setUploadingLoader(true));
       dispatch(messageSenderChatTop(chatID));
-      attachments.append('content', message);
-      mutate(attachments);
-      dispatch(removeAttachments());
+      attchmentData.append('content', message);
+      mutate(attchmentData);
+      setAttchmentData(null);
       setSelectedAttachments('')
       setmessage('')
       return
@@ -60,9 +56,7 @@ const TypingComp = ({ members ,  chatID ,}) => {
   //message typing
   useEffect(()=>{
     if (message) {
-      if (!isTyping) {
-        console.log(user.name, 'user.name');
-        
+      if (!isTyping) { 
         socket.emit(TYPING_MESSAGE, {chatID, members, userName : user.name});
         setIsTyping(true);
       }
@@ -79,7 +73,7 @@ const TypingComp = ({ members ,  chatID ,}) => {
     <div className=' w-full h-full gap-x-2 max-sm:gap-x-0 border flex bg-[#eff3f6] items-center shadow'>
       <div className={' relative'}>
       <IconButtonsComp  title={'Add file'} Iccon={AttachFileIcon} onClick={handleAttachFile}/>
-      {fileClicked && <InputDropDown selectedAttachments={selectedAttachments} setSelectedAttachments={setSelectedAttachments} chatID={chatID} content={message}/>}
+      {fileClicked && <InputDropDown setAttchmentData={setAttchmentData} selectedAttachments={selectedAttachments} setSelectedAttachments={setSelectedAttachments} chatID={chatID} content={message}/>}
       </div>
       <input className=' w-full h-10 rounded-lg outline-none bg-white my-1  px-3 text-sm' onChange={(e) => setmessage(e.target.value)}  value={message} placeholder='Type a message' type="text" />
       <IconButtonsComp className={'w-24'} title={'Send'} Iccon={SendIcon} onClick={handleSend} />

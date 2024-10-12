@@ -10,8 +10,6 @@ import { useNavigate } from "react-router-dom";
 
 
 const getChatsListFunc = async (data, filter) => {
-console.log('getChatsListFunc');
-
   try {
     const response = await api.get(`/chat/get-my-chat?search=${data}&filter=${filter}`);
     return response.data;
@@ -33,7 +31,6 @@ export const getChatsList = (data, filter) => {
     retryDelay: 1000,
     refetchOnWindowFocus: false,
     onSuccess: (data) => {
-      console.log('getChatsList', data);
       dispatch(addChatsList(data.chats));
       dispatch(addMessageCountAndAleartFromLocal());
     },
@@ -45,8 +42,6 @@ export const getChatsList = (data, filter) => {
 
 
 const sendRequestFunc = async (userID) => {
-  console.log('sendRequestFunc');
-
   const data = { userID };
   try {
     const response = await api.put('/user/send-request', data);
@@ -61,8 +56,6 @@ export const sendFriendRequest = () => {
   return useMutation({
     mutationFn: sendRequestFunc,
     onSuccess: (data) => {
-  console.log('sendFriendRequest', data);
-
       toast.success(data.message);
     },
     onError: (err) => {
@@ -73,7 +66,6 @@ export const sendFriendRequest = () => {
 
 
 const getNotificationFunc = async () => {
-  console.log('getNotificationFunc');
   try {
     const response = await api.get('/user/get-all-requests');
     return response.data;
@@ -91,22 +83,17 @@ export const getNotification = () => {
     staleTime: 200000,
     retry: 1,
     refetchOnWindowFocus: false,
-    onSuccess: (data) => {
-      console.log('getNotification', data);
-      
+    onSuccess: (data) => { 
       dispatch(setNotificationsList(data.data));
     },
     onError: (err) => {
       console.log(err, "This is error of notification fetching");
-
     }
   })
 }
 
 
 const acceptRequestFunc = async (data) => {
-  console.log('acceptRequestFunc');
-  
   try {
     const response = await api.put('/user/accept-request', data);
     return response.data;
@@ -123,9 +110,6 @@ export const acceptFriendRequest = () => {
       toast.success(data.message);
       queryClient.invalidateQueries(['notification']);
       queryClient.invalidateQueries(['Chats-list']);
-      console.log('acceptFriendRequest', data);
-      
-      //use socket
     },
     onError: (error) => {
       console.log(error, 'This is error');
@@ -135,7 +119,6 @@ export const acceptFriendRequest = () => {
 }
 
 const fetchChatDetailFunc = async (chatID, populate) => {
-  console.log('fetchChatDetailFunc func');
   try {
     const response = await api.get(`/chat/${chatID}?populate=${populate}`);
     return response.data
@@ -156,7 +139,6 @@ export const getChatDetail = (chatID, populate = false) => {
     // staleTime : 30000,
     // enabled : false,
     onSuccess: (data) => {
-      console.log(data.data, 'This is chatDetail data');
       if (!data.data.groupChat) {
         const chattingWith = data.data?.members?.filter((member) => member._id !== user._id);
         dispatch(addChatDetail(chattingWith));
@@ -173,7 +155,6 @@ export const getChatDetail = (chatID, populate = false) => {
 
 
 const fetchChatDetailEditFunc = async (chatID, populate) => {
-  console.log('getChatDetailEdit func called');
   try {
     const response = await api.get(`/chat/edit/${chatID}?populate=${populate}`);
     return response.data
@@ -195,7 +176,6 @@ export const getChatDetailEdit = (chatID, populate = false) => {
     // staleTime : 30000,
     // enabled : false,
     onSuccess: (data) => {
-      console.log(data.data, 'This is chatDetail data');
       if (!data.data.groupChat) {
         const chattingWith = data.data?.members?.filter((member) => member._id !== user._id);
         dispatch(addChatDetail(chattingWith));
@@ -212,7 +192,6 @@ export const getChatDetailEdit = (chatID, populate = false) => {
 
 
 export const getAllMessagesFunc = async (chatID, page) => {
-  console.log('getAllMessagesFunc func');
   try {
     const response = await api.get(`chat/message/${chatID}?page=${page}`);
     return response.data;
@@ -235,7 +214,6 @@ export const getMessages = (chatID, page) => {
     onSuccess: (data) => {
       dispatch(setAllMessages(data.messages));
       dispatch(setHasMoreData(data.hasMore));
-      console.log('getMessages data', data);
     },
     onError: (err) => {
       console.log(err, 'error ');
@@ -246,8 +224,6 @@ export const getMessages = (chatID, page) => {
 
 const sendAttachmentFunc = async (file) => {
   // const data = {chatID , content}
-  console.log('sendAttachment func');
-  
   try {
     const response = await api.post('chat/message', file,
       {
@@ -268,8 +244,6 @@ export const sendAttachment = () => {
     mutationFn: sendAttachmentFunc,
     onSuccess: (data) => {
       dispatch(setUploadingLoader(false));
-      console.log('sendAttachment data', data);
-      
     },
     onError: (err) => {
       console.log('This is err of sendAttachment');
@@ -281,7 +255,6 @@ export const sendAttachment = () => {
 const removeMemberFunc = async (data) => {
   try {
     const response = await api.put('chat/remove-member', data);
-    console.log(response , 'This is response removeMemberFunc');
     return response.data;
   } catch (error) {
     throw error;
@@ -294,25 +267,18 @@ export const removeMemberMutate = () => {
   return useMutation({
     mutationFn: removeMemberFunc,
     onSuccess: (data, variables) => {
-      console.log('removeMember', data);
-      console.log('variables', variables);
       queryClient.invalidateQueries(['Chat-details-Edit'])
       queryClient.invalidateQueries(['Group-non-members', variables.chatID])
       toast.success(data.message)
     },
     onError: (err) => {
       toast.error(err.response.data.error)
-      console.log('This is err of removeMember', err);
-
     }
   })
 }
 const addMemberFunc = async (data) => {
-  console.log(data , 'drete');
-  
   try {
     const response = await api.put('chat/add-members' , data);
-    console.log(response , 'This is response addMemberFunc');
     return response.data;
   } catch (error) {
     throw error;
@@ -325,16 +291,12 @@ export const addMemberMutate = () => {
   return useMutation({
     mutationFn: addMemberFunc,
     onSuccess: (data, variables) => {
-      console.log('addMember', data);
-      console.log('variables', variables);
       queryClient.invalidateQueries(['Chat-details-Edit'])
       queryClient.invalidateQueries(['Group-non-members', variables.chatID])
       toast.success(data.message)
     },
     onError: (err) => {
       toast.error(err.response.data.error)
-      console.log('This is err of addMember', err);
-
     }
   })
 }
@@ -344,7 +306,6 @@ export const addMemberMutate = () => {
 const leaveGroupFunc = async (groupID) => {
   try {
     const response = await api.delete(`chat/leave-group/${groupID}`);
-    console.log(response , 'This is response leaveGroupFunc');
     return response.data;
   } catch (error) {
     throw error;
@@ -365,8 +326,6 @@ export const leaveGroup = () => {
     },
     onError: (err) => {
       toast.error(err.response.data.error)
-      console.log('This is err of removeMember', err);
-
     }
   })
 }
@@ -377,7 +336,6 @@ const createGroupFunc = async (formData) => {
         'Content-Type': 'multipart/form-data',
       }}
     );
-    console.log(response , 'This is response createGroupFunc');
     return response.data;
   } catch (error) {
     throw error;
@@ -400,17 +358,13 @@ export const createGroup = () => {
     },
     onError: (err) => {
       toast.error(err.response.data.error)
-      console.log('This is err of createGroup', err);
-
     }
   })
 }
 const makeAdminFunc = async (groupIDandUserID) => {
   const {groupID, userID} = groupIDandUserID;
-  console.log(groupID, userID, 'groupID, userID');
   try {
     const response = await api.post(`chat/make-admin?groupID=${groupID}&userID=${userID}`);
-    console.log(response , 'This is response makeAdminFunc');
     return response.data;
   } catch (error) {
     throw error;
@@ -430,17 +384,13 @@ export const makeAdmin = () => {
     },
     onError: (err) => {
       toast.error(err.response.data.error)
-      console.log('This is err of makeAdmin', err);
-
     }
   })
 }
 const removeAdminFunc = async (groupIDandUserID) => {
   const {groupID, userID} = groupIDandUserID;
-  console.log(groupID, userID, 'groupID, userID');
   try {
     const response = await api.post(`chat/remove-admin?groupID=${groupID}&userID=${userID}`);
-    console.log(response , 'This is response removeAdminFunc');
     return response.data;
   } catch (error) {
     throw error;
@@ -459,9 +409,7 @@ export const removeAdmin = () => {
       toast.success(data.message);
     },
     onError: (err) => {
-      toast.error(err.response.data.error)
-      console.log('This is err of removeAdmin', err);
-
+      toast.error(err.response.data.error);
     }
   })
 }

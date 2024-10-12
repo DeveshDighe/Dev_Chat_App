@@ -21,8 +21,6 @@ const randomReducer = createSlice({
       state.newUserSearch = action.payload;
     },
     setProfileClicked : (state,action) => {
-      console.log('enterd');
-      
         state.profileClicked = action.payload;
     },
     setChatClicked : (state,action) => {

@@ -9,7 +9,6 @@ import { getSocket } from "../utils/socket";
 
 
 const getUserFunc = async() => {
-  console.log('getUserFunc');
   try {
     const response = await api.get(`/user/get-user`);
       return response.data
@@ -29,7 +28,6 @@ export const getUserData = async () => {
     retryDelay: 1000,
     refetchOnWindowFocus: false,
     onSuccess : (data) => {
-      console.log('getUserDatavbnvnvbnvbnbvnvbn', data);
       dispatch(addUser(data.user));
     },
     onError : (err) => {
@@ -40,8 +38,6 @@ export const getUserData = async () => {
 
 
 const handleLoginFunc = async (userData) => {
-  console.log('handleLoginFunc');
-
   try {
     const response = await api.post('/user', userData)
     return response.data
@@ -57,7 +53,6 @@ export const loginUser = () => {
   return useMutation({
     mutationFn: handleLoginFunc, // `handleLoginFunc` expects `userData` as an argument
     onSuccess: (data) => {
-      console.log('loginUser', data);
       queryClient.invalidateQueries(['user-data']);
       
       localStorage.setItem('User-Token', data.token);
@@ -74,12 +69,9 @@ export const loginUser = () => {
 
 
 const handleRegisterFunc =async (formdata) => {
-
-  console.log('handleRegisterFunc');
-  
-  for (let [key, value] of formdata.entries()) {
-    console.log(key, value);
-  }
+  // for (let [key, value] of formdata.entries()) {
+  //   console.log(key, value);
+  // }
   
   try {
     const response = await api.post('user/create', formdata,{
@@ -98,8 +90,6 @@ export const registerUser = () => {
   return useMutation({
     mutationFn : handleRegisterFunc,
     onSuccess : (data) => {
-      console.log('registerUser', data);
-      
       toast.success(data.message);
       navigate('/login');
     },
@@ -110,7 +100,6 @@ export const registerUser = () => {
 }
 
 const handleLogout = async () => {
-  console.log('handleLogoutFunc');
   try {
     const response = await api.get('user/logout')
     return response.data;
@@ -126,7 +115,6 @@ export const logOutUser = () => {
     onSuccess : (data) => {
       dispatch(removeUser());
       toast.success(data.message);
-      console.log('logOutUser', data); 
     },
     onError : (err) => {
       toast.error(err.response.data.message);
@@ -136,7 +124,6 @@ export const logOutUser = () => {
 
 
 const getSearchDataFunc = async () => {
-  console.log('getSearchDataFunc');
   try {
     const response = await api('user/search-users');
     return response.data;
@@ -154,9 +141,7 @@ export const getSerchData = (searchData) => {
     retry: 2,
     retryDelay: 1000,
     refetchOnWindowFocus: false,
-    onSuccess : (data) => {
-      console.log(data, 'This is data getSerchData');
-      
+    onSuccess : (data) => { 
     },
     onError : (err) => {
       
@@ -167,7 +152,6 @@ export const getSerchData = (searchData) => {
 
 
 const getAllUsersFunc = async (name) => {
-  console.log('getSearchDataFunc');
   try {
     const response = await api.get(`user/all-users?name=${name}`);
     return response.data;
@@ -177,12 +161,10 @@ const getAllUsersFunc = async (name) => {
 }
 
 export const getAllUsers = () => {
-  console.log('called with', name);
-  
   return useMutation({
     mutationFn : getAllUsersFunc,
     onSuccess : (data) => {
-      console.log(data, 'This is data getAllUsers');
+
     },
     onError : (err) => {
       

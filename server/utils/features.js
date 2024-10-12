@@ -37,11 +37,7 @@ const sendToken =async (res, user, statusCode, message) => {
 const emitEvent = (req, event , users, data) => {
   let io = req.app.get('io');
   const membersSockets = getSocketID(users);
-  console.log(membersSockets , "This is member socket");
-  
   io.to(membersSockets).emit(event, data);
-
-console.log('Emitign evebt');
 
 }
 

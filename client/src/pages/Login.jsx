@@ -19,10 +19,10 @@ const Login = ({ user }) => {
 
   const { errors, values, handleSubmit, handleChange, touched } = useFormik({
     initialValues: { name: '', password: '' },
-    // validationSchema : loginSchema,
+    validationSchema : loginSchema,
     onSubmit: (value, action) => {
       mutate(value);
-      // action.resetForm();
+      action.resetForm();
     }
   });
 
@@ -95,7 +95,7 @@ const Login = ({ user }) => {
             <Box display="flex" flexDirection="column" width="100%" position="relative">
               <TextField
                 fullWidth
-                label="Name"
+                label="Username"
                 margin="normal"
                 variant="outlined"
                 name='name'

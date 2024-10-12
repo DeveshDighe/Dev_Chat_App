@@ -5,10 +5,7 @@ const ChatList = ({ chats=[]}) => {
   return (
     <div className=''>
       {chats?.map((data, index)=>{    
-        const {avatar, name, _id,groupImg, groupChat, members, latestMessage, chats, newMessages,newMessageCount, status} = data;
-
-        console.log(data , 'lslllddfdffd');
-        
+        const {avatar, name, _id,groupImg, groupChat, members, latestMessage, chats, newMessages,newMessageCount, status} = data;     
         return (
         <ChatItem 
         index={index}

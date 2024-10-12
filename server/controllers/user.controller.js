@@ -83,8 +83,6 @@ const createUser = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    console.log('get user hitted');
-    
     const user = await User.findById(req.userID); 
 
     res.status(200).json({ status: 'success', message: 'User found', user })
@@ -94,11 +92,7 @@ const getUser = async (req, res) => {
 }
 const getUserProfileDetail = async (req, res) => {
   try {
-    const {userID} = req.query
-    console.log(req.query , 'req.query');
-    
-    console.log(userID, 'useriD');
-    
+    const {userID} = req.query  
     const user = await User.findById(userID); 
 
     res.status(200).json({ status: 'success', message: 'User profile detail found', user })
@@ -266,8 +260,6 @@ const getMyFriends = async (req, res) => {
     const chatID = req.query.chatID;
     const { name } = req.query;
 
-    console.log(name , 'maama');
-    
     // Ensure chatID is provided
     if (!chatID) {
       return res.status(400).json({ status: 'error', message: 'Chat ID is required' });
@@ -293,8 +285,6 @@ const getMyFriends = async (req, res) => {
     // Fetch users who are not part of the chat group
     const friendsNotInChatGroup = await User.find(query, "name avatar");
 
-    console.log(friendsNotInChatGroup, 'friendsNotInChatGroup');
-
     // Return the users who are not part of the chat group
     return res.status(200).json({
       status: "success",
@@ -316,14 +306,10 @@ const getAllUser = async (req, res) => {
 
     const users = await User.find({name: { $regex: name, $options: 'i' }});
 
-    console.log(userID, userID);
-    
-
     const usersExeptMe = users.filter((user) => {
       return user._id.toString() !== userID.toString()
     })
 
-    console.log(users , 'This is users');
     res.status(200).json({ status: 'success', message: 'all users fetched', users : usersExeptMe})
     
   } catch (error) {

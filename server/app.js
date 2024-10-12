@@ -115,9 +115,7 @@ io.on("connection", async (socket) => {
   });
 
   socket.on(TYPING_MESSAGE, async ({ chatID, members, userName}) => {
-      const socketId = getSocketIDWithoutEmitter(members, user._id.toString());
-      console.log(socketId , 'This is socket dfff id', userName);
-      
+      const socketId = getSocketIDWithoutEmitter(members, user._id.toString()); 
       if (socketId) {
         io.to(socketId).emit(TYPING_MESSAGE, {
           chatID,
@@ -127,8 +125,6 @@ io.on("connection", async (socket) => {
   });
   socket.on(TYPING_SOPPED_MESSAGE, async ({ chatID, members}) => {
       const socketId = getSocketIDWithoutEmitter(members, user._id.toString());
-      console.log(socketId , 'This is socket dfff id stopped');
-      
       if (socketId) {
         io.to(socketId).emit(TYPING_SOPPED_MESSAGE, {
           chatID,

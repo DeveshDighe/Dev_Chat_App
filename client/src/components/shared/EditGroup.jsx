@@ -82,7 +82,6 @@ const EditGroup = () => {
   }
 
   const getGroupNonMembersFunc = async (groupID, searchUserData) => {
-    console.log('getGroupNonMembersFunc func');
     try {
       const response = await api.get(`chat/get-my-memberNotInGroup?name=${searchUserData}&chatID=${groupID}`);
       return response.data;
@@ -101,7 +100,6 @@ const EditGroup = () => {
     onSuccess: (data) => {
       setUserNotInGroup(data.friendsNotInGroup);
       queryClient.invalidateQueries(['Chat-details-Edit', groupID]);
-      console.log('getGroupNonMembersFunc data', data);
     },
     onError: (err) => {
       console.log(err, 'error ');
@@ -121,17 +119,10 @@ const EditGroup = () => {
     }
   }, [searchUserData, refetchGroupNonMem]);
 
-  console.log(usersToAdd, 'these are users to add');
-
-
   const handleConfirmExit = () => {
     leaveGroupMutate(groupID);
     setConfirmExit(false);
   }
-
-  console.log(moreClicked, 'moreClicked');
-  console.log(chatDetail, 'chatDetail');
-  
 
   return (
     <div className='conta2 relative bg-[#f7f7f7] flex flex-col overflow-auto'>

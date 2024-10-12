@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { Avatar, Box, Button, Container, IconButton, Paper, Stack, TextField, Typography } from '@mui/material';
 import { FaRegUser } from "react-icons/fa";
 import { CameraAlt } from '@mui/icons-material';
@@ -22,8 +22,14 @@ const Register = ({user}) => {
 
   const navigate = useNavigate();
 
-  const {mutate} = registerUser();
+  const {mutate, isError} = registerUser();
 
+  useEffect(() => {
+    if (isError) {
+      setCreatingUser(false);
+    }
+  }, [isError]);
+  
   if (user) {
     return <Navigate to={'/'} />
     
@@ -57,7 +63,7 @@ const Register = ({user}) => {
 
   const { errors, values, handleSubmit, handleChange, touched, setFieldValue } = useFormik({
     initialValues : {name : '', email : '',username : '', bio : '', password : '', avatar : ''},
-    // validationSchema : RegisterSchema,
+    validationSchema : RegisterSchema,
     onSubmit : (value, action) => {
       setCreatingUser(true);
       const formData = new FormData();
@@ -87,8 +93,9 @@ const Register = ({user}) => {
 
   return (
     <Container component={'main'} maxWidth='false' sx={{
-      height: '100vh',
+      height: '100%',
       paddingTop: '110px',
+      paddingBottom: '110px',
       width: '100%',
       background: 'linear-gradient(51deg, rgba(137,117,240,0.8127626050420168) 0%, rgba(124,208,249,0.8295693277310925) 100%)',
     }}>
@@ -241,7 +248,7 @@ const Register = ({user}) => {
         </>
       </Paper>
           {creatingUser &&
-            <div className='absolute left-[45%] top-10 z-30 text-center self-center flex items-center gap-x-2 py-2 px-3 bg-white px-3 rounded-md'>
+            <div className='absolute left-[42%] top-10 z-30 text-center self-center flex items-center gap-x-2 py-2 px-3 bg-white  rounded-md'>
               <ClipLoader
                 color="#00b2ff"
                 size={20}
