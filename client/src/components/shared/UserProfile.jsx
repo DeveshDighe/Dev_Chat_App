@@ -42,9 +42,9 @@ const UserProfile = ({ userID, setVisitProfileClicked , setVisitProfile}) => {
   };
 
 
-  if (isLoading) {
-    return <div>Loading....</div>
-  }
+  // if (isLoading) {
+  //   return <div>Loading....</div>
+  // }
   return (
     <div className='pb-4 min-h-full bg-[#f5f5f5] flex flex-col'>
       <div className=' flex gap-x-2 pt-2 items-center bg-white mb-4 pb-3 px-2'>
