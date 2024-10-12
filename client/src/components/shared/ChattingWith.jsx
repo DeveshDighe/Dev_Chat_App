@@ -27,7 +27,7 @@ const ChattingWith = ({chattingWith, userTyping}) => {
     <div className=' flex justify-between h-full bg-[#eff3f6] py-1 px-4'>
       <div className=' flex gap-x-3 items-center'>
       <div className=' w-9 h-9 relative'>
-        <img className=' w-full h-full object-cover rounded-3xl' src={User?.avatar} alt="Profile pic" />
+        <img className=' w-full h-full object-cover rounded-3xl' src={User?.avatar || 'https://wallpapers.com/images/featured/blank-white-background-xbsfzsltjksfompa.jpg'} alt="Profile pic" />
         {
           User?.status === 'ONLINE' && 
           <div className=' h-[0.6rem] w-[0.6rem] absolute bg-green-400 rounded-full bottom-0 right-0'>

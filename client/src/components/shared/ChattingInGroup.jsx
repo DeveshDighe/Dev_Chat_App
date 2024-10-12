@@ -25,7 +25,7 @@ const ChattingInGroup = ({chattingInGroup , userTyping}) => {
     <div className=' flex justify-between h-full bg-[#eff3f6] py-1 px-4'>
       <div className=' flex gap-x-3 items-center'>
       <div className=' w-9 h-9'>
-        <img className=' w-full h-full object-cover rounded-3xl' src={Group.groupImg} alt="Profile pic" />
+        <img className=' w-full h-full object-cover rounded-3xl' src={Group.groupImg || 'https://wallpapers.com/images/featured/blank-white-background-xbsfzsltjksfompa.jpg'} alt="Profile pic" />
       </div>
       <div>
         <p className=' font-semibold'>{Group.name}</p>
