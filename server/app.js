@@ -3,11 +3,13 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const allRoutes = require('./routes');
+const cron = require('node-cron');
 const { connectDB } = require('./utils/features');
 const { Server } = require('socket.io');
 const { createServer } = require('http');
 const { NEW_MESSAGE, NEW_MESSAGE_ALERT, TYPING_MESSAGE, TYPING_SOPPED_MESSAGE, USER_ONLINE, USER_OFFLINE } = require('./constants/events');
 const uuid = require('uuid');
+const axios = require('axios');
 const cloudinary = require('cloudinary');
 const Message = require('./models/message');
 const { socketAuthenticator } = require('./middlewares/auth');
@@ -47,7 +49,22 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+app.get('/', async (req, res)=>{
+  res.send('Chat app working')
+})
+
 app.use('/api/v1', allRoutes);
+
+cron.schedule('*/10 * * * *', async () => {
+  try {
+    const response = await axios.get(`${process.env.BACK_SERVER_URL}`);
+    console.log('Request successful:', response.data);
+  } catch (error) {
+    console.error('Error making request:', error.message);
+  }
+}, {
+  timezone: 'Asia/Kolkata'
+});
 
 io.use(async(socket, next) => {
   await socketAuthenticator(socket, next);
