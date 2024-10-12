@@ -115,7 +115,6 @@ const Chat = () => {
   // Handle new messages from socket
   const messageListener = useCallback((data) => {
 
-    console.log(data, chatId , 'popo');
     
     if (data.message.chat === chatId) {
       const newMessage = data.message;
@@ -242,16 +241,15 @@ const Chat = () => {
                   })
           }
         </div>
-        <div className='h-14'>
-          {uploadingLoader &&
-            <div className='absolute left-[45%] bottom-16 z-30 text-center self-center flex items-center gap-x-2 bg-white px-3 rounded-md'>
-              <ClipLoader
-                color="#00b2ff"
-                size={20}
-                speedMultiplier={2}
-              />
-              <p className=' text-[16px]'>Sending...</p>
-            </div>}
+        <div className='h-14 '>
+          {uploadingLoader && (
+            <div className='absolute bottom-16 z-30 flex items-center justify-center w-full'>
+              <div className='flex items-center gap-x-2 bg-white px-3 rounded-md'>
+                <ClipLoader color="#00b2ff" size={20} speedMultiplier={2} />
+                <p className='text-[16px]'>Sending...</p>
+              </div>
+            </div>
+          )}
           <TypingComp chatID={chatId} members={memberIds} />
         </div>
       </div>

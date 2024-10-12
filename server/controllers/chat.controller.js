@@ -370,7 +370,7 @@ const sendAttachments = async (req, res) => {
 
 
 
-    const messageForDb = { content: content, attachements: attachments, sender: user._id, chat: chatID };
+    const messageForDb = { content: content ? content : "attachment", attachements: attachments, sender: user._id, chat: chatID };
 
     const messageForRealTime = {    // pasting all the messageForDb and then making changes in sender
       ...messageForDb,
