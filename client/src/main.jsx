@@ -18,7 +18,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
       <SocketProvider>
-        <ReactQueryDevtools initialIsOpen={true} position='bottom-left'/>
+        {/* <ReactQueryDevtools initialIsOpen={true} position='bottom-left'/> */}
         <HelmetProvider>
           <CssBaseline />
           <App />

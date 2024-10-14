@@ -62,7 +62,7 @@ const ProtectedRoute = ({ user , token}) => {
   const RefetchGroupDetailListener = useCallback(
     (data) => {
       queryClient.invalidateQueries(['Group-non-members', extraID])
-      queryClient.invalidateQueries(['Chat-details-Edit', extraID])
+      queryClient.invalidateQueries(['Chat-details-Edit'])
     },
     [dispatch]
   );

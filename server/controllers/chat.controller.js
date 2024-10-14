@@ -77,7 +77,8 @@ const getMyChat = async (req, res) => {
         groupChat = false;
       }
       
-      chats = await Chat.find({ members: req.userID, 'name': { $regex: searchTerm, $options: 'i' }, groupChat: groupChat })
+      if (filter === "All") {
+        chats = await Chat.find({ members: req.userID, 'name': { $regex: searchTerm, $options: 'i' }})
         .populate('members', 'name avatar status')
         .populate({
           path: 'latestMessage',
@@ -87,6 +88,20 @@ const getMyChat = async (req, res) => {
           },
         }).sort({ latestMessageTime: -1 });
 
+      }
+      else{
+        chats = await Chat.find({ members: req.userID, 'name': { $regex: searchTerm, $options: 'i' }, groupChat: groupChat })
+        .populate('members', 'name avatar status')
+        .populate({
+          path: 'latestMessage',
+          populate: {
+            path: 'sender',
+            select: 'name', // Adjust fields based on your User schema
+          },
+        }).sort({ latestMessageTime: -1 });
+
+      }
+     
         
       //populate only name  and avatar
     } else {

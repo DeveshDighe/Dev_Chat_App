@@ -49,7 +49,9 @@ const GroupMember = ({ member, creator, admins, moreClicked, setMoreClicked, set
   // Check if the member is an admin
   const isAdmin = admins.some(admin => admin._id === member._id);
   // console.log(member, isAdmin, 'Member and isAdmin');
-  const Admin = admins.filter(admin => admin._id === member._id);
+  const Admin = admins.some(admin => admin?._id === user?._id);
+  console.log(Admin , 'Admin');
+  
   return (
     <div className=' custom-md:w-[60%] w-[60%] m-auto flex justify-between'>
       <div className='flex gap-x-2 items-center text-sm'>
@@ -64,6 +66,7 @@ const GroupMember = ({ member, creator, admins, moreClicked, setMoreClicked, set
       </div>
       <div className='cursor-pointer relative' ref={moreRef}>
         <MoreHorizIcon sx={{ color: '#3a3a3a' }} onClick={handleMoreClicked} />
+        
         {(user?._id === creator._id || isAdmin) ? (  // Check if the user is the creator or an admin
           <>
             {moreClicked?._id === member?._id && ( // Check if the dropdown is open for this member
@@ -91,11 +94,11 @@ const GroupMember = ({ member, creator, admins, moreClicked, setMoreClicked, set
         ) : (
           moreClicked?._id === member?._id && ( // Check if the dropdown is open for this member
             <div className='absolute text-sm w-28 border top-5 left-[-40px] bg-white z-10 rounded-md border-gray-400 overflow-hidden'>
-              {!isAdmin && member._id !== user?._id && (
+              {Admin && (
                 <p className='py-1 hover:bg-[#f1f1f1] text-green-500' onClick={handleMakeAdminClick}>Make Admin</p>
               )}
               <p className='py-1 hover:bg-[#f1f1f1]' onClick={handleProfileClick}>Visit Profile</p>
-              {!isAdmin && member._id !== user?._id && (
+              {Admin && (
                 <p className='py-1 hover:bg-[#f1f1f1] text-red-600' onClick={handleUserRemove}>Remove</p>
               )}
               

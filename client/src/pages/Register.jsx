@@ -102,6 +102,7 @@ const Register = ({user, token}) => {
       <Paper
         sx={{
           padding: 4,
+          paddingX: { xs: 2, md: 4 }, // Less paddingX (1) on extra-small screens, more (4) on small and larger
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -149,6 +150,7 @@ const Register = ({user, token}) => {
                 value={values.name}
                 onChange={handleChange}
                 sx={inputStyle}
+                autoComplete="off"
               />
               <Box sx={{ position: 'absolute', top: '29px', right: '15px', opacity: 0.6, zIndex: 10, marginLeft: '20px', cursor: 'pointer' }}>
                 <FaRegUser size={17} />
@@ -165,6 +167,7 @@ const Register = ({user, token}) => {
                 value={values.username}
                 onChange={handleChange}
                 sx={inputStyle}
+                autoComplete="off"
               />
               <Box sx={{ position: 'absolute', top: '29px', right: '15px', opacity: 0.6, zIndex: 10, marginLeft: '20px', cursor: 'pointer' }}>
                 <FaRegUser size={17} />
@@ -182,6 +185,7 @@ const Register = ({user, token}) => {
                 value={values.email}
                 onChange={handleChange}
                 sx={inputStyle}
+                autoComplete="off"
               />
               <Box sx={{ position: 'absolute', top: '29px', right: '15px', opacity: 0.6, zIndex: 10, marginLeft: '20px', cursor: 'pointer' }}>
                 <MdOutlineEmail size={17} />
@@ -199,6 +203,7 @@ const Register = ({user, token}) => {
                 margin="normal"
                 variant="outlined"
                 sx={inputStyle}
+                autoComplete="off"
               />
               <Box sx={{ position: 'absolute', top: '29px', right: '15px', opacity: 0.6, zIndex: 10, marginLeft: '20px', cursor: 'pointer' }}>
                 <MdOutlineDescription size={17} />

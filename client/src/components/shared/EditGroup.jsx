@@ -62,8 +62,9 @@ const EditGroup = () => {
     try {
       const response = await api.put(`/chat/edit/${groupID}`, { name: changedName.current.value });
       if (response.data.status === 'success') {
-        queryClient.invalidateQueries(['Chat-details-Edit', groupID]);
+        queryClient.invalidateQueries(['Chat-details-Edit']);
         queryClient.invalidateQueries(['Chats-list']);
+        refetch();
         toast.success('Group name changed')
       }
       setEditClicked(false);
@@ -99,7 +100,7 @@ const EditGroup = () => {
     refetchOnWindowFocus: false,
     onSuccess: (data) => {
       setUserNotInGroup(data.friendsNotInGroup);
-      queryClient.invalidateQueries(['Chat-details-Edit', groupID]);
+      queryClient.invalidateQueries(['Chat-details-Edit']);
     },
     onError: (err) => {
       console.log(err, 'error ');

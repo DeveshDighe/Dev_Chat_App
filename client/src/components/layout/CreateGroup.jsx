@@ -13,11 +13,11 @@ const CreateGroup = () => {
 
   const [file, setFile] = useState(null);
   const [name, setName] = useState('');
-  const [members , setMembers] = useState([]);
+  const [members, setMembers] = useState([]);
   const [isFocused, setIsFocused] = useState(false);
   const dropdownRef = useRef(null);
 
-  const {mutate : creategroupMutate, isLoading : createGroupLoading} = createGroup();
+  const { mutate: creategroupMutate, isLoading: createGroupLoading } = createGroup();
 
   const { errors, values, handleSubmit, handleChange, touched, setFieldValue } = useFormik({
     initialValues: { groupName: '', avatar: '' },
@@ -29,12 +29,12 @@ const CreateGroup = () => {
       const formData = new FormData();
       formData.append('avatar', file);
       formData.append('groupName', value.groupName);
-      const memberIds = members.map((member)=> member._id)   
+      const memberIds = members.map((member) => member._id)
       formData.append('members', JSON.stringify(memberIds)); // Since members is an array, we stringify it
 
       creategroupMutate(formData); // Your mutation logic here
     }
-    
+
   });
 
   const handleFileChange = (event) => {
@@ -46,7 +46,7 @@ const CreateGroup = () => {
     }
   };
 
-  const {data, isLoading, mutate} = getAllUsers()
+  const { data, isLoading, mutate } = getAllUsers()
 
 
   useEffect(() => {
@@ -54,19 +54,19 @@ const CreateGroup = () => {
     const timer = setTimeout(() => {
       mutate(name);
     }, 1000);
-  
+
     return () => {
       clearTimeout(timer);
     }
   }, [name])
-  
+
   const handleAddMember = (user) => {
     if (!members.find((member) => member._id === user?._id)) {
       setMembers([...members, user]);
     }
   };
   const handleRemoveMember = (user) => {
-    const usersAfterFilter = members.filter((member)=> member._id !== user?._id);
+    const usersAfterFilter = members.filter((member) => member._id !== user?._id);
     setMembers(usersAfterFilter);
   };
 
@@ -88,7 +88,7 @@ const CreateGroup = () => {
     <div className=' p-2 scroll relative'>
       <form onSubmit={handleSubmit} className=' scroll'>
         <div className=' flex justify-center'>
-        <input className=' w-[80%] border outline-none font-[300] p-1 rounded-md' type="text" placeholder='Enter group name' name="groupName" value={values.groupName} onChange={handleChange} />
+          <input className=' w-[80%] border outline-none font-[300] p-1 rounded-md' type="text" placeholder='Enter group name' name="groupName" value={values.groupName} onChange={handleChange} />
         </div>
         <p className=' text-center text-lg mt-2'>{values.groupName}</p>
         <Stack position={'relative'} width={'10rem'} margin={'auto'} marginY={'20px'}>
@@ -116,50 +116,49 @@ const CreateGroup = () => {
           </IconButton>
         </Stack>
         <div className=' flex gap-x-2 justify-center flex-wrap gap-y-2 mb-3 scroll'>
-          {members.map((member)=>(
+          {members.map((member) => (
             <div key={member._id} className=' py-0 px-2 rounded-sm flex gap-x-1 bg-red-300 items-center'>
               <p>{member.name}</p>
-              <span onClick={()=>handleRemoveMember(member)} className=' cursor-pointer'>
-              <CloseIcon sx={{fontSize : '15px'}}/>
+              <span onClick={() => handleRemoveMember(member)} className=' cursor-pointer'>
+                <CloseIcon sx={{ fontSize: '15px' }} />
               </span>
-              </div>
+            </div>
           ))}
         </div>
         <div className=' flex justify-center relative' ref={dropdownRef}>
-        <input className=' w-[80%] border outline-none font-[300] p-1 rounded-md' placeholder={'Search users to add'} onFocus={() => setIsFocused(true)} type="text" onChange={(e)=>setName(e.target.value)} />
-        {isFocused &&
-        <div className=' absolute top-8 bg-gray-100  w-[80%] max-h-40 overflow-auto scroll'>
-          {
-            isLoading ?
-            <div className=' flex justify-center items-center h-36'>
-              <ClipLoader
-                color="#00b2ff"
-                size={20}
-                speedMultiplier={2}
-              />
+          <input className=' w-[80%] border outline-none font-[300] p-1 rounded-md' placeholder={'Search users to add'} onFocus={() => setIsFocused(true)} type="text" onChange={(e) => setName(e.target.value)} />
+          {isFocused &&
+            <div className=' absolute top-8 bg-gray-100  w-[80%] max-h-40 overflow-auto scroll'>
+              {
+                isLoading ?
+                  <div className=' flex justify-center items-center h-36'>
+                    <ClipLoader
+                      color="#00b2ff"
+                      size={20}
+                      speedMultiplier={2}
+                    />
+                  </div>
+                  :
+                  data?.users.map((user) => (
+                    <div key={user?._id} className=' cursor-pointer hover:bg-white py-1' onClick={() => handleAddMember(user)}>{user?.name}</div>
+                  ))
+              }
             </div>
-            :
-            data?.users.map((user)=> (
-              <div key={user?._id} className=' cursor-pointer hover:bg-white py-1' onClick={() => handleAddMember(user)}>{user?.name}</div>
-            ))
           }
         </div>
-}
-        </div>
-        
+
         <div className=' flex justify-center'>
-        <input disabled={createGroupLoading && true} className=' border py-1 px-3 rounded-md mt-4 bg-green-500 text-white' type="submit" value={'Create Group'} />
+          <input disabled={createGroupLoading && true} className=' border py-1 px-3 rounded-md mt-4 bg-green-500 text-white' type="submit" value={'Create Group'} />
         </div>
       </form>
-      {createGroupLoading &&
-            <div className='absolute justify-center w-[90%] m-auto bottom-[-30px] z-30 text-center self-center flex items-center gap-x-2 bg-white px-3 rounded-md '>
-              <ClipLoader
-                color="#00b2ff"
-                size={20}
-                speedMultiplier={2}
-              />
-              <p className=' text-[16px]'>Creating group...</p>
-            </div>}
+      {createGroupLoading && (
+        <div className='absolute bottom-16 z-30 flex items-center justify-center w-full'>
+          <div className='flex items-center gap-x-2 bg-white px-3 rounded-md'>
+            <ClipLoader color="#00b2ff" size={20} speedMultiplier={2} />
+            <p className='text-[16px]'>Creating group...</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
