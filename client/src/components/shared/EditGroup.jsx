@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef, useState } from 'react'
+import React, { memo, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grow, IconButton, Tooltip } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { addMemberMutate, getChatDetailEdit, leaveGroup } from '../../tanstack/chats_logic';
@@ -13,9 +13,12 @@ import Friends from '../layout/Friends';
 import { addSearchUser } from '../../redux/reducers/auth';
 import AddMembersGroup from '../layout/AddMembersGroup';
 import KeyboardBackspaceOutlinedIcon from '@mui/icons-material/KeyboardBackspaceOutlined';
-import { ADDED_IN_GROUP } from '../../constants/events';
+import { MAKE_GROUP_ADMIN, REMOVE_GROUP_ADMIN } from '../../constants/events';
 import UserProfile from './UserProfile';
 import toast from 'react-hot-toast';
+import { getSocket } from '../../utils/socket';
+import { useSocketEvents } from '../../hooks/hook';
+
 
 const EditGroup = () => {
 
@@ -36,6 +39,8 @@ const EditGroup = () => {
 
   const { chatDetail } = useSelector((state) => state.chatReducer);
   const { user } = useSelector((state) => state.authReducer);
+
+  const {socket} = getSocket();
 
 
   const { refetch, data, isLoading } = getChatDetailEdit(groupID, true);
@@ -124,6 +129,21 @@ const EditGroup = () => {
     leaveGroupMutate(groupID);
     setConfirmExit(false);
   }
+
+  const removeGroupAdminListener = useCallback((data) => {
+    queryClient.invalidateQueries(['Chat-details-Edit']);
+  }, [groupID]);
+
+  const makeGroupAdminListener = useCallback((data) => {
+    queryClient.invalidateQueries(['Chat-details-Edit']);
+  }, [groupID]);
+
+  const eventHandler = {
+    [REMOVE_GROUP_ADMIN]: removeGroupAdminListener,
+    [MAKE_GROUP_ADMIN]: makeGroupAdminListener,
+  };
+
+  useSocketEvents(socket, eventHandler);
 
   return (
     <div className='conta2 relative bg-[#f7f7f7] flex flex-col overflow-auto'>

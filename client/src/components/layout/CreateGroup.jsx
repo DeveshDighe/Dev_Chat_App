@@ -1,6 +1,6 @@
 import { CameraAlt } from '@mui/icons-material'
 import { Avatar, IconButton, Stack } from '@mui/material'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { memo, useEffect, useRef, useState } from 'react'
 import { VisuallyHiddenInput } from '../styles/StyledComponent'
 import { useFormik } from 'formik'
 import { getAllUsers } from '../../tanstack/user_logic'
@@ -152,7 +152,7 @@ const CreateGroup = () => {
         </div>
       </form>
       {createGroupLoading && (
-        <div className='absolute bottom-16 z-30 flex items-center justify-center w-full'>
+        <div className='absolute -bottom-11 z-30 flex items-center justify-center w-[99%] '>
           <div className='flex items-center gap-x-2 bg-white px-3 rounded-md'>
             <ClipLoader color="#00b2ff" size={20} speedMultiplier={2} />
             <p className='text-[16px]'>Creating group...</p>
@@ -163,4 +163,4 @@ const CreateGroup = () => {
   )
 }
 
-export default CreateGroup
+export default memo(CreateGroup)

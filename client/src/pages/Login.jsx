@@ -22,7 +22,7 @@ const Login = ({ user, token }) => {
     validationSchema: loginSchema,
     onSubmit: (value, action) => {
       mutate(value);
-      action.resetForm();
+      // action.resetForm();
     }
   });
 

@@ -62,7 +62,7 @@ export const loginUser = () => {
     },
     onError: (error) => {
       console.error('Login failed:', error);
-      alert(error.response.data.message);
+      toast.error(error.response.data.message);
     }
   });
 }

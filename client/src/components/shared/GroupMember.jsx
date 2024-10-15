@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { useSelector } from 'react-redux';
 import { makeAdmin, removeAdmin, removeMemberMutate } from '../../tanstack/chats_logic';
@@ -6,7 +6,6 @@ import { useParams } from 'react-router-dom';
 
 
 const GroupMember = ({ member, creator, admins, moreClicked, setMoreClicked, setVisitProfileClicked }) => {
-
   const { user } = useSelector((state) => state.authReducer);
   const moreRef = useRef();
 
@@ -50,8 +49,7 @@ const GroupMember = ({ member, creator, admins, moreClicked, setMoreClicked, set
   const isAdmin = admins.some(admin => admin._id === member._id);
   // console.log(member, isAdmin, 'Member and isAdmin');
   const Admin = admins.some(admin => admin?._id === user?._id);
-  console.log(Admin , 'Admin');
-  
+
   return (
     <div className=' custom-md:w-[60%] w-[60%] m-auto flex justify-between'>
       <div className='flex gap-x-2 items-center text-sm'>
@@ -114,4 +112,4 @@ const GroupMember = ({ member, creator, admins, moreClicked, setMoreClicked, set
   );
 };
 
-export default GroupMember;
+export default memo(GroupMember);

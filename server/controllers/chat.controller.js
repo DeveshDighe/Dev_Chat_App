@@ -1,5 +1,5 @@
 
-const { ALERT, REFETCH_CHATS, NEW_ATTACHMENT, NEW_MESSAGE_ALERT, NEW_MESSAGE, REFETCH_GROUP_DETAIL, ADDED_IN_GROUP } = require('../constants/events.js');
+const { ALERT, REFETCH_CHATS, NEW_ATTACHMENT, NEW_MESSAGE_ALERT, NEW_MESSAGE, REFETCH_GROUP_DETAIL, ADDED_IN_GROUP, MAKE_GROUP_ADMIN, REMOVE_GROUP_ADMIN } = require('../constants/events.js');
 const { getOtherMember } = require('../lib/helper.js');
 const Chat = require('../models/chat.js');
 const User = require('../models/user.js');
@@ -654,6 +654,8 @@ const makeAdmin = async (req, res) => {
     }
 
     const group = await Chat.findById(groupID);
+    emitEvent(req, MAKE_GROUP_ADMIN, group.members);
+    
     if (group.admin.includes(userID)) {
       throw new Error('Already admin')
     }
@@ -685,6 +687,8 @@ const removeAdmin = async (req, res) => {
     }
 
     const group = await Chat.findById(groupID);
+    emitEvent(req, REMOVE_GROUP_ADMIN, group.members);
+
     if (!group.admin.includes(userID)) {
       throw new Error('User is not an admin');
     }

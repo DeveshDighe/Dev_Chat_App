@@ -12,8 +12,9 @@ import { registerFormik } from '../lib/formikLogic';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { registerUser } from '../tanstack/user_logic';
 import ClipLoader from 'react-spinners/ClipLoader';
+import toast from 'react-hot-toast';
 
-const Register = ({user, token}) => {
+const Register = ({ user, token }) => {
   const [showPass, setShowPass] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [creatingUser, setCreatingUser] = useState(false);
@@ -22,17 +23,17 @@ const Register = ({user, token}) => {
 
   const navigate = useNavigate();
 
-  const {mutate, isError} = registerUser();
+  const { mutate, isError } = registerUser();
 
   useEffect(() => {
     if (isError) {
       setCreatingUser(false);
     }
   }, [isError]);
-  
+
   if (token) {
     return <Navigate to={'/'} />
-    
+
   }
 
   const inputStyle = {
@@ -62,9 +63,12 @@ const Register = ({user, token}) => {
 
 
   const { errors, values, handleSubmit, handleChange, touched, setFieldValue } = useFormik({
-    initialValues : {name : '', email : '',username : '', bio : '', password : '', avatar : ''},
-    validationSchema : RegisterSchema,
-    onSubmit : (value, action) => {
+    initialValues: { name: '', email: '', username: '', bio: '', password: '', avatar: '', confirmPassword : '' },
+    validationSchema: RegisterSchema,
+    onSubmit: (value, action) => {   
+      if (value.password !== value.confirmPassword) {
+        return toast.error('Both passwords should match');
+      }
       setCreatingUser(true);
       const formData = new FormData();
       formData.append('avatar', file);
@@ -72,9 +76,8 @@ const Register = ({user, token}) => {
       formData.append('bio', value.bio);
       formData.append('username', value.username);
       formData.append('password', value.password);
-
       mutate(formData);
-      
+
     }
   });
 
@@ -232,6 +235,26 @@ const Register = ({user, token}) => {
               </Box>
             </Box>
             {touched.password && errors.password && (<p className='feildWarnings'>{errors.password}</p>)}
+            <Box display="flex" flexDirection="column" width="100%" position="relative">
+              <TextField
+                fullWidth
+                type={showPass ? 'text' : 'password'}
+                label="confirmPassword"
+                name='confirmPassword'
+                value={values.confirmPassword}
+                onChange={handleChange}
+                margin="normal"
+                variant="outlined"
+                sx={inputStyle}
+              />
+              <Box sx={{ position: 'absolute', top: '29px', right: '15px', opacity: 0.6, zIndex: 10, marginLeft: '20px', cursor: 'pointer' }}>
+                {showPass ?
+                  <IoMdEyeOff onClick={() => setShowPass(toggle => !toggle)} size={17} />
+                  :
+                  <FaEye onClick={() => setShowPass(toggle => !toggle)} size={17} />
+                }
+              </Box>
+            </Box>
 
             <Container sx={{ display: 'flex', justifyContent: 'center', padding: '20px 0px' }}>
               <Button variant='contained' type='submit' sx={{ background: '#8975f0', ':hover': { background: '#8F3EFF', } }}>
@@ -252,15 +275,13 @@ const Register = ({user, token}) => {
           </form>
         </>
       </Paper>
-          {creatingUser &&
-            <div className='absolute left-[42%] top-10 z-30 text-center self-center flex items-center gap-x-2 py-2 px-3 bg-white  rounded-md'>
-              <ClipLoader
-                color="#00b2ff"
-                size={20}
-                speedMultiplier={2}
-              />
-              <p className=' text-[16px]'>User creating...</p>
-            </div>}
+      {creatingUser &&
+        <div className='absolute justify-center w-full top-10 z-30 text-center left-0 flex items-center gap-x-2 py-2 px-3  rounded-md'>
+          <div className='flex items-center gap-x-2 bg-white px-3 rounded-md'>
+            <ClipLoader color="#00b2ff" size={20} speedMultiplier={2} />
+            <p className='text-[16px]'>Creating user...</p>
+          </div>
+        </div>}
     </Container>
   )
 }

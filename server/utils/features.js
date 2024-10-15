@@ -46,14 +46,16 @@ const uploadFilesToClodinary = async (files, folder) => {
     files.forEach(file => {
       const mimeType = file.mimetype;
 
-      if (mimeType.startsWith('image/')) {
-        folder ='image attachments';
-      } else if (mimeType.startsWith('audio/')) {
-        folder = 'audio attachments';
-      } else if (mimeType.startsWith('video/')) {
-        folder = 'video attachments'
-      } else {
-        folder = 'file attachments' // For unsupported file types
+      if (folder !== 'profile_pics') {
+        if (mimeType.startsWith('image/')) {
+          folder ='image attachments';
+        } else if (mimeType.startsWith('audio/')) {
+          folder = 'audio attachments';
+        } else if (mimeType.startsWith('video/')) {
+          folder = 'video attachments'
+        } else {
+          folder = 'file attachments' // For unsupported file types
+        }
       }
     });
     return new Promise((resolve, reject) => {
