@@ -3,15 +3,17 @@ import React, { memo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { removeUser } from '../../redux/reducers/auth';
 import { setChatClicked, setProfileClicked } from '../../redux/reducers/random';
+import {useNavigate} from 'react-router-dom'
 import { getSocket } from '../../utils/socket';
+
 
 const Profile = () => {
   const { user } = useSelector((state) => state.authReducer);
   const [imageClicked, setImageClicked] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
 
-  const {disconnectSocket} = getSocket();
-
+  const { disconnectSocket } = getSocket();
+  const navigate = useNavigate();
 
   const dispatch = useDispatch();
 
@@ -20,7 +22,7 @@ const Profile = () => {
   };
 
   const handleLogOutClick = () => {
-    setConfirmLogout(true); 
+    setConfirmLogout(true);
   };
 
   const handleConfirmLogOut = () => {
@@ -30,6 +32,7 @@ const Profile = () => {
     disconnectSocket()
     dispatch(removeUser());
     setConfirmLogout(false);
+    navigate('/login')
   };
 
   const handleCancelLogOut = () => {

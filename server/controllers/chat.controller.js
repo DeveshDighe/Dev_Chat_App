@@ -47,7 +47,7 @@ const newGroupChat = async (req, res) => {
       creator: req.userID,
       admin: [req.userID],
       members: parsedMembers,
-      groupImgPublicId : result[0]?.public_id , 
+      groupImgPublicId: result[0]?.public_id,
     });
 
     // emitEvent(req, ALERT, parsedMembers, `Welcome to ${groupName} group`);
@@ -67,42 +67,42 @@ const getMyChat = async (req, res) => {
   let chats;
 
   try {
-    
+
     if (searchTerm || (filter === 'Groups' || filter === 'Chats')) {
-      
+
       let groupChat;
       if (filter === 'Groups' || filter === 'All') {
         groupChat = true;
       } else {
         groupChat = false;
       }
-      
+
       if (filter === "All") {
-        chats = await Chat.find({ members: req.userID, 'name': { $regex: searchTerm, $options: 'i' }})
-        .populate('members', 'name avatar status')
-        .populate({
-          path: 'latestMessage',
-          populate: {
-            path: 'sender',
-            select: 'name', // Adjust fields based on your User schema
-          },
-        }).sort({ latestMessageTime: -1 });
+        chats = await Chat.find({ members: req.userID, 'name': { $regex: searchTerm, $options: 'i' } })
+          .populate('members', 'name avatar status')
+          .populate({
+            path: 'latestMessage',
+            populate: {
+              path: 'sender',
+              select: 'name', // Adjust fields based on your User schema
+            },
+          }).sort({ latestMessageTime: -1 });
 
       }
-      else{
+      else {
         chats = await Chat.find({ members: req.userID, 'name': { $regex: searchTerm, $options: 'i' }, groupChat: groupChat })
-        .populate('members', 'name avatar status')
-        .populate({
-          path: 'latestMessage',
-          populate: {
-            path: 'sender',
-            select: 'name', // Adjust fields based on your User schema
-          },
-        }).sort({ latestMessageTime: -1 });
+          .populate('members', 'name avatar status')
+          .populate({
+            path: 'latestMessage',
+            populate: {
+              path: 'sender',
+              select: 'name', // Adjust fields based on your User schema
+            },
+          }).sort({ latestMessageTime: -1 });
 
       }
-     
-        
+
+
       //populate only name  and avatar
     } else {
 
@@ -395,9 +395,12 @@ const sendAttachments = async (req, res) => {
         avatar: user.avatar
       },
     };
- 
     const message = await Message.create(messageForDb); //creating new message for db
 
+    chat.latestMessage = message._id;
+    chat.latestMessageTime = Date.now();
+    chat.save();
+    
     emitEvent(req, NEW_MESSAGE, chat.members, {
       message: messageForRealTime,
       chatID
@@ -422,7 +425,7 @@ const getChatDetails = async (req, res) => {
     if (req.query.populate === 'true') {
 
       const chat = await Chat.findById(chatID).populate('members', 'name avatar status').lean();    //Lean makes it a plain javascript object
-      
+
       if (!chat) {
         throw new Error('Chat not found');
       }
@@ -463,7 +466,7 @@ const getChatDetailsEdit = async (req, res) => {
         throw new Error('Chat not found');
       }
 
-      chat.members = chat.members.map(({ _id, name, avatar , status}) => ({
+      chat.members = chat.members.map(({ _id, name, avatar, status }) => ({
         _id,
         name,
         status,
@@ -644,7 +647,7 @@ const makeAdmin = async (req, res) => {
   try {
 
 
-    const {groupID, userID} = req.query;
+    const { groupID, userID } = req.query;
 
     if (!groupID) {
       throw new Error('Group id required')
@@ -655,11 +658,11 @@ const makeAdmin = async (req, res) => {
 
     const group = await Chat.findById(groupID);
     emitEvent(req, MAKE_GROUP_ADMIN, group.members);
-    
+
     if (group.admin.includes(userID)) {
       throw new Error('Already admin')
     }
-    
+
     group.admin = [...group.admin, userID]
 
     await group.save()
@@ -677,7 +680,7 @@ const removeAdmin = async (req, res) => {
   try {
 
 
-    const {groupID, userID} = req.query;
+    const { groupID, userID } = req.query;
 
     if (!groupID) {
       throw new Error('Group id required')

@@ -10,7 +10,22 @@ const chatReducer = createSlice({
   initialState,
   reducers: {
     addChatsList: (state, action) => {
-      state.chatsList = action.payload;
+      // Loop through the chat list to update latestMessage
+      const updatedChatList = action.payload.map((chat) => {
+        // Check if latestMessage content is empty, then update
+        const updatedMessage = chat.latestMessage?.content === "" 
+          ? { ...chat.latestMessage, content: 'Attachment' } 
+          : chat.latestMessage;
+        
+        // Return updated chat object
+        return {
+          ...chat,
+          latestMessage: updatedMessage,
+        };
+      });
+      
+      // Update state with the modified chat list
+      state.chatsList = updatedChatList;
     },
     addMessageCountAndAleartFromLocal: (state, action) => {
       const localData = localStorage.getItem('chatData'); // Assuming chatData is an array of objects [{ chatID, messageCount }]
