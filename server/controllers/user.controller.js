@@ -12,7 +12,7 @@ const loginUser = async (req, res) => {
   try {
     const { name, password } = req.body;
 
-    const username = name;
+    const username = name.trim();
 
     if (!username || !password) {
       throw new Error('Both feilds required')
@@ -45,6 +45,9 @@ const createUser = async (req, res) => {
 
     const file = req.file;
 
+    const trimmedName = name.trim();
+    const trimmedUserName = username.trim();
+
     if (!req.file) {
       throw new Error('Please upload avatar');
     }
@@ -58,8 +61,8 @@ const createUser = async (req, res) => {
 
     const hashhedPass = await bcrypt.hash(password, 10);
     const createdUser = await User.create({
-      name,
-      username,
+      name : trimmedName,
+      username : trimmedUserName,
       password: hashhedPass,
       bio,
       avatar

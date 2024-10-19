@@ -7,7 +7,7 @@ const AttachmentContent = ({message, user, timeAgo}) => {
         className={`${
           message?.sender._id === user?._id
             ? 'self-end bg-[#93d6fa] text-left'
-            : 'self-start bg-[#9f90f3] text-left'
+            : 'self-start ml-8 max-custom-mdb:ml-8 max-md:ml-8 max-custom-xSmall:ml-[10%] bg-[#9f90f3] text-left'
         } inline-block p-2 rounded-lg text-left`}
       >
         {message.content}

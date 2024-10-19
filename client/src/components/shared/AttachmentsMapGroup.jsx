@@ -12,7 +12,7 @@ const AttachmentsMapGroup = ({ attachments, message, user, timeAgo ,index}) => {
         return (
           <div key={`${index}_${timeAgo}`} className={`${message?.sender._id === user?._id ? 'self-end max-w-[55%]' : ' flex gap-x-2 max-w-[55%]'}`}>
             {message?.sender._id !== user?._id &&
-              <div className=' w-6 h-6 mt-1'>
+              <div className='w-auto h-auto max-w-[1.5rem] max-h-[1.5rem] mt-1'>
                 <img className=' w-full h-full object-cover rounded-3xl' src={message?.sender?.avatar?.url} alt="sender dp" />
               </div>
             }
