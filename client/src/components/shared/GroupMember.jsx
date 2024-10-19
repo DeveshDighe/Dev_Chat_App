@@ -108,6 +108,7 @@ const GroupMember = ({
             )}
           </>
         ) : (
+          moreClicked?._id === member?._id && 
           (
             <div className='absolute text-sm w-28 border top-5 left-[-40px] bg-white z-10 rounded-md border-gray-400 overflow-hidden'>
               {/* Make Admin is hidden if the member is already an admin */}
